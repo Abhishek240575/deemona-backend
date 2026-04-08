@@ -1,0 +1,86 @@
+DEEMONA FINANCE PLATFORM
+COMMERCIAL SOFTWARE LICENSE AGREEMENT
+
+Version 1.0 - Effective Date: January 2026
+
+Copyright © 2026 Deemona Finance Solutions. All rights reserved.
+
+IMPORTANT - READ CAREFULLY: This License Agreement ("Agreement") is a legal 
+agreement between you (either an individual or a single entity, "Licensee") and 
+Deemona Finance Solutions ("Licensor") for the Deemona Finance Platform software 
+product, which includes computer software and may include associated media, 
+printed materials, and online or electronic documentation ("Software").
+
+BY INSTALLING, COPYING, OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND 
+BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS 
+AGREEMENT, DO NOT INSTALL OR USE THE SOFTWARE.
+
+1. GRANT OF LICENSE
+
+Subject to the terms and conditions of this Agreement, Licensor grants to 
+Licensee a non-exclusive, non-transferable license to:
+
+a) Install and use the Software on a single production server
+b) Make reasonable number of backup copies
+c) Use the Software for internal business purposes only
+
+2. RESTRICTIONS
+
+Licensee shall NOT:
+
+a) Reverse engineer, decompile, or disassemble the Software
+b) Modify, adapt, translate, or create derivative works
+c) Rent, lease, sublicense, or distribute the Software
+d) Remove or alter any proprietary notices
+e) Use the Software for service bureau or hosting services
+f) Share access credentials with unauthorized users
+
+3. INTELLECTUAL PROPERTY
+
+All title and intellectual property rights in and to the Software remain with 
+Licensor. This Agreement does not grant any rights to trademarks or service marks.
+
+4. SUPPORT AND UPDATES
+
+- Initial 12 months of support included
+- Software updates provided at Licensor's discretion
+- Extended support available through separate agreement
+
+5. WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS 
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS 
+FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+6. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR 
+CONSEQUENTIAL DAMAGES WHATSOEVER ARISING OUT OF THE USE OF OR INABILITY TO USE 
+THE SOFTWARE.
+
+7. TERM AND TERMINATION
+
+This Agreement is effective until terminated. Licensor may terminate if Licensee 
+breaches any term. Upon termination, Licensee must destroy all copies of Software.
+
+8. CONFIDENTIALITY
+
+Licensee acknowledges that the Software contains proprietary and confidential 
+information and agrees to maintain such information in confidence.
+
+9. COMPLIANCE WITH LAWS
+
+Licensee shall comply with all applicable laws and regulations regarding use of 
+the Software, including export control laws.
+
+10. GENERAL
+
+This Agreement constitutes the entire agreement and supersedes all prior 
+agreements. This Agreement shall be governed by the laws of [Jurisdiction].
+
+FOR QUESTIONS OR LICENSING INQUIRIES:
+
+Deemona Finance Solutions
+Email: license@deemona.com
+Phone: +1 (555) 123-4567
+Website: www.deemona.com
