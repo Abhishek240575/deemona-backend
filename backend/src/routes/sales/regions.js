@@ -1,0 +1,4 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT reg.*,u.first_name||' '||u.last_name AS manager,COUNT(dl.id) AS deal_count,COALESCE(SUM(dl.amount),0) AS total_revenue FROM regions reg LEFT JOIN users u ON reg.manager_id=u.id LEFT JOIN deals dl ON dl.region_id=reg.id AND dl.stage='closed_won' WHERE reg.tenant_id=$1 GROUP BY reg.id,u.first_name,u.last_name ORDER BY total_revenue DESC`,[req.tenantId]);res.json({regions:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.get('/:id/revenue',async(req,res)=>{try{const d=await db.tenantQuery(req.tenantId,`SELECT DATE_TRUNC('month',actual_close)::DATE AS month,SUM(amount) AS revenue,COUNT(*) AS deals FROM deals WHERE tenant_id=$1 AND region_id=$2 AND stage='closed_won' GROUP BY 1 ORDER BY 1`,[req.tenantId,req.params.id]);res.json({revenue:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

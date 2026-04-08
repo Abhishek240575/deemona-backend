@@ -1,0 +1,4 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM dashboard_favorites WHERE user_id=$1 ORDER BY created_at DESC NULLS LAST,id DESC LIMIT 100`,[req.user?.sub]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO dashboard_favorites(user_id,dashboard_id,is_default,display_order) VALUES($1,$2,$3,$4) RETURNING *`,[req.user?.sub,b.dashboard_id,b.is_default,b.display_order]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

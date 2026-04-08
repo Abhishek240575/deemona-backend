@@ -1,0 +1,4 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM comments WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST,id DESC LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO comments(tenant_id,entity_type,entity_id,content,is_internal) VALUES($1,$2,$3,$4,$5) RETURNING *`,[req.tenantId,b.entity_type,b.entity_id,b.content,b.is_internal]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

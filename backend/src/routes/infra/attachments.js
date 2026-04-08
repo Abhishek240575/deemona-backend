@@ -1,0 +1,4 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM file_attachments WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST,id DESC LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO file_attachments(tenant_id,entity_type,entity_id,file_name,file_size_bytes,mime_type,storage_url) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,[req.tenantId,b.entity_type,b.entity_id,b.file_name,b.file_size_bytes,b.mime_type,b.storage_url]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

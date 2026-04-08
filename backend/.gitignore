@@ -1,0 +1,6 @@
+*.sql
+deemona_backup.sql
+deemona_backup_clean.sql
+deemona_render_import.sqlnode_modules/ 
+.env 
+*.log 

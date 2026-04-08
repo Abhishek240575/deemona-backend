@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Email — Deemona Finance Solution</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%230d9488'/><text x='50' y='68' text-anchor='middle' font-size='58' font-weight='700' fill='white' font-family='serif'>D</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#070b14;--accent:#0d9488;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--green:#10b981;--red:#ef4444}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{width:100%;max-width:500px;padding:20px}
+.logo-section{text-align:center;margin-bottom:40px}
+.logo-icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#0d9488,#0f766e);display:inline-flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:34px;color:#fff;margin-bottom:16px}
+.logo-brand{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,#5eead4,#2dd4bf,#14b8a6,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:rgba(17,24,39,.7);backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,.08);border-radius:16px;padding:40px;text-align:center}
+.spinner{display:inline-block;width:40px;height:40px;border:4px solid rgba(13,148,136,.2);border-top-color:#0d9488;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.icon{font-size:64px;margin-bottom:20px}
+.title{font-size:24px;font-weight:700;margin-bottom:12px}
+.message{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.btn{display:inline-block;padding:12px 24px;border-radius:10px;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+.btn:hover{opacity:0.9}
+.success{display:none}
+.error{display:none}
+.loading{display:block}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="logo-section">
+  <div class="logo-icon">D</div>
+  <div class="logo-brand">Deemona Finance Solution</div>
+</div>
+
+<div class="card">
+  <div class="loading" id="loadingState">
+    <div class="spinner"></div>
+    <div class="title">Verifying your email...</div>
+    <div class="message">Please wait while we verify your email address.</div>
+  </div>
+
+  <div class="success" id="successState">
+    <div class="icon">✅</div>
+    <div class="title">Email Verified!</div>
+    <div class="message">Your email has been successfully verified. You can now access all features of Deemona Finance Solution.</div>
+    <a href="login.html" class="btn">Continue to Login</a>
+  </div>
+
+  <div class="error" id="errorState">
+    <div class="icon">❌</div>
+    <div class="title">Verification Failed</div>
+    <div class="message" id="errorMessage">The verification link is invalid or has expired.</div>
+    <a href="login.html" class="btn">Back to Login</a>
+  </div>
+</div>
+</div>
+
+<script>
+const API_URL = localStorage.getItem('deemona_api_url') || 'https://deemona-backend.onrender.com';
+
+// Get token from URL
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+
+if (!token) {
+  showError('No verification token provided');
+} else {
+  verifyEmail(token);
+}
+
+async function verifyEmail(token) {
+  try {
+    const res = await fetch(`${API_URL}/v1/auth/verify-email?token=${token}`, {
+      method: 'GET'
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.error || 'Verification failed');
+    }
+    
+    showSuccess();
+    
+  } catch (err) {
+    showError(err.message);
+  }
+}
+
+function showSuccess() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('errorState').style.display = 'none';
+  document.getElementById('successState').style.display = 'block';
+}
+
+function showError(msg) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('successState').style.display = 'none';
+  document.getElementById('errorMessage').textContent = msg;
+  document.getElementById('errorState').style.display = 'block';
+}
+</script>
+</body>
+</html>

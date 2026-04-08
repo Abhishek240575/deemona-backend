@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  deemona-api:
+    build: .
+    container_name: deemona-finance-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AUTH_ENABLED=true
+      - JWT_SECRET=${JWT_SECRET:-change-this-in-production}
+      - API_KEY=${API_KEY:-change-this-in-production}
+      - WS_ENABLED=true
+      - CORS_ORIGIN=*
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Uncomment when you add Redis caching:
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+
+  # Uncomment when you add PostgreSQL:
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: deemona_finance
+  #     POSTGRES_USER: deemona
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-change-this}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   pgdata:

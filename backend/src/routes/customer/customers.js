@@ -1,0 +1,5 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM customers WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.get('/:id',async(req,res)=>{try{const d=await db.query(`SELECT * FROM customers WHERE id=$1 AND tenant_id=$2`,[req.params.id,req.tenantId]);if(!d.rows.length)return res.status(404).json({error:'Not found'});res.json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO customers(tenant_id,name,segment,industry,mrr,arr,health_score,cac,contract_start,contract_end) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,[req.tenantId,b.name,b.segment,b.industry,b.mrr,b.arr,b.health_score,b.cac,b.contract_start,b.contract_end]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

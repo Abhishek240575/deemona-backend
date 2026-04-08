@@ -1,0 +1,5 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM payroll_runs WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.get('/:id',async(req,res)=>{try{const d=await db.query(`SELECT * FROM payroll_runs WHERE id=$1 AND tenant_id=$2`,[req.params.id,req.tenantId]);if(!d.rows.length)return res.status(404).json({error:'Not found'});res.json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO payroll_runs(tenant_id,period_start,period_end,total_gross,total_deductions,total_net,total_benefits,total_taxes,headcount) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,[req.tenantId,b.period_start,b.period_end,b.total_gross,b.total_deductions,b.total_net,b.total_benefits,b.total_taxes,b.headcount]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

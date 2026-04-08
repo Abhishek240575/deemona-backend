@@ -1,0 +1,3 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT c.*,er.rate,er.rate_date FROM currencies c LEFT JOIN LATERAL(SELECT rate,rate_date FROM exchange_rates WHERE base_currency='USD' AND target_currency=c.code ORDER BY rate_date DESC LIMIT 1) er ON TRUE ORDER BY c.code`);res.json({currencies:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

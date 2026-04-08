@@ -1,0 +1,4 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM stock_data WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST,id DESC LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO stock_data(tenant_id,trade_date,open_price,close_price,high_price,low_price,volume,market_cap) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,[req.tenantId,b.trade_date,b.open_price,b.close_price,b.high_price,b.low_price,b.volume,b.market_cap]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

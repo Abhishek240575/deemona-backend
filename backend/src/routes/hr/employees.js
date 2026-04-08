@@ -1,0 +1,5 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM employees WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.get('/:id',async(req,res)=>{try{const d=await db.query(`SELECT * FROM employees WHERE id=$1 AND tenant_id=$2`,[req.params.id,req.tenantId]);if(!d.rows.length)return res.status(404).json({error:'Not found'});res.json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO employees(tenant_id,employee_number,first_name,last_name,email,department_id,job_title,hire_date,base_salary,employment_type,location,gender,ethnicity) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,[req.tenantId,b.employee_number,b.first_name,b.last_name,b.email,b.department_id,b.job_title,b.hire_date,b.base_salary,b.employment_type,b.location,b.gender,b.ethnicity]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

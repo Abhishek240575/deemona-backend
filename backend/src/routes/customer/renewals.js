@@ -1,0 +1,5 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{try{const d=await db.query(`SELECT * FROM renewals WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST LIMIT 100`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.get('/:id',async(req,res)=>{try{const d=await db.query(`SELECT * FROM renewals WHERE id=$1 AND tenant_id=$2`,[req.params.id,req.tenantId]);if(!d.rows.length)return res.status(404).json({error:'Not found'});res.json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO renewals(tenant_id,customer_id,type,amount,status,due_date) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,[req.tenantId,b.customer_id,b.type,b.amount,b.status,b.due_date]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;

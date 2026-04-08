@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Deemona Finance</title>
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Admin Header - More Compact */
+.admin-header {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-logo {
+  font-size: 24px;
+}
+
+.admin-title h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.admin-title p {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-user-info {
+  text-align: right;
+}
+
+.admin-user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.admin-user-role {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-logout {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* Admin Container - Compact */
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+
+/* Stats Grid - Smaller Cards */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-stat-card {
+  background: rgba(26, 34, 54, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--card-color);
+}
+
+.admin-stat-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.admin-stat-label {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.admin-stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+.admin-stat-delta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--card-color);
+}
+
+/* Tabs - Compact */
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding-bottom: 2px;
+  overflow-x: auto;
+}
+
+.admin-tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s;
+  position: relative;
+  white-space: nowrap;
+}
+
+.admin-tab:hover {
+  color: #e2e8f0;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.admin-tab.active {
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.admin-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #6366f1;
+}
+
+/* Tab Content */
+.admin-tab-content {
+  display: none;
+}
+
+.admin-tab-content.active {
+  display: block;
+}
+
+/* User Table - Compact */
+.admin-table-container {
+  background: rgba(26, 34, 54, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 360px);  /* ← Fixed height */
+}
+
+.admin-table-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.admin-table-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.admin-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-search-input {
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 12px;
+  width: 240px;
+}
+
+.admin-search-input:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.btn-export {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-export:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+/* Table with scroll */
+.admin-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+  flex-grow: 1;
+  max-height: 500px;  /* ← Add explicit max height */
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  background: #1a2236;
+  padding: 10px 12px;
+  text-align: left;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+  font-size: 12px;
+}
+
+.admin-table tr:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.user-status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-verified {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-suspended {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.admin-action-btn {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.btn-edit {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.btn-edit:hover {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+.btn-suspend {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.btn-suspend:hover {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.btn-unsuspend {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-unsuspend:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.btn-delete {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* Loading */
+.loading-spinner {
+  text-align: center;
+  padding: 32px;
+  color: #94a3b8;
+}
+
+.spinner {
+  font-size: 36px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error-message {
+  text-align: center;
+  padding: 32px;
+  color: #ef4444;
+}
+
+.pagination {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  flex-shrink: 0;
+}
+
+.pagination-info {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 12px;
+  }
+  
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .admin-search-input {
+    width: 100%;
+  }
+  
+  .admin-table-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+  </style>
+</head>
+<body>
+  <!-- Admin Header -->
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-logo">🔐</div>
+      <div class="admin-title">
+        <h1>Admin Control Panel</h1>
+        <p>Deemona Finance Platform Management</p>
+      </div>
+    </div>
+    <div class="admin-header-right">
+      <div class="admin-user-info">
+        <div class="admin-user-name" id="adminUserName">Admin User</div>
+        <div class="admin-user-role">Super Administrator</div>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">🚪 Logout</button>
+    </div>
+  </div>
+  
+  <!-- Admin Container -->
+  <div class="admin-container">
+    
+    <!-- Stats Grid -->
+    <div class="admin-stats-grid" id="adminStatsGrid">
+      <div class="loading-spinner">
+        <div class="spinner">⏳</div>
+        <p>Loading statistics...</p>
+      </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('users')">👥 User Management</button>
+      <button class="admin-tab" onclick="switchAdminTab('analytics')">📊 Analytics</button>
+      <button class="admin-tab" onclick="switchAdminTab('activity')">📋 Activity Logs</button>
+      <button class="admin-tab" onclick="switchAdminTab('settings')">⚙️ System Settings</button>
+    </div>
+    
+    <!-- User Management Tab -->
+    <div id="tab-users" class="admin-tab-content active">
+      <div class="admin-table-container">
+        <div class="admin-table-header">
+          <div class="admin-table-title">📋 All Users</div>
+          <div class="admin-search-box">
+            <input type="text" class="admin-search-input" id="userSearchInput" placeholder="🔍 Search users by email or name..." oninput="searchUsers(this.value)">
+            <button class="btn-export" onclick="exportUsers()">📥 Export CSV</button>
+          </div>
+        </div>
+        <div id="userTableContainer">
+          <div class="loading-spinner">
+            <div class="spinner">⏳</div>
+            <p>Loading users...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Analytics Tab -->
+    <div id="tab-analytics" class="admin-tab-content">
+      <div class="admin-table-container">
+        <div class="admin-table-header">
+          <div class="admin-table-title">📊 Platform Analytics</div>
+        </div>
+        <div style="padding: 40px; text-align: center; color: #94a3b8;">
+          <p>Analytics charts coming soon...</p>
+          <p style="margin-top: 12px; font-size: 13px;">User growth trends, login activity, and platform metrics</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Activity Logs Tab -->
+    <div id="tab-activity" class="admin-tab-content">
+      <div class="admin-table-container">
+        <div class="admin-table-header">
+          <div class="admin-table-title">📋 Recent Activity</div>
+        </div>
+        <div id="activityLogsContainer">
+          <div style="padding: 40px; text-align: center; color: #94a3b8;">
+            <p>Activity logging enabled</p>
+            <p style="margin-top: 12px; font-size: 13px;">Admin actions are being tracked in the database</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- System Settings Tab -->
+    <div id="tab-settings" class="admin-tab-content">
+      <div class="admin-table-container">
+        <div class="admin-table-header">
+          <div class="admin-table-title">⚙️ System Configuration</div>
+        </div>
+        <div style="padding: 40px;">
+          <h3 style="margin-bottom: 20px; color: #e2e8f0;">Database Connection</h3>
+          <p style="color: #94a3b8; margin-bottom: 12px;">Database: <strong style="color: #e2e8f0;">deemona_enterprise</strong></p>
+          <p style="color: #94a3b8; margin-bottom: 12px;">Host: <strong style="color: #e2e8f0;">dpg-d754cd24d50c73e4qprg-a.oregon-postgres.render.com</strong></p>
+          <p style="color: #94a3b8; margin-bottom: 24px;">Status: <strong style="color: #10b981;">✅ Connected</strong></p>
+          
+          <h3 style="margin-top: 32px; margin-bottom: 20px; color: #e2e8f0;">API Endpoints</h3>
+          <p style="color: #94a3b8; margin-bottom: 12px;">Base URL: <strong style="color: #e2e8f0;">https://deemona-backend.onrender.com</strong></p>
+          <p style="color: #94a3b8; margin-bottom: 12px;">Admin API: <strong style="color: #e2e8f0;">/v1/admin/*</strong></p>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <script>
+    // Check authentication
+    if (!sessionStorage.getItem('admin_authenticated')) {
+      window.location.href = '/admin_login.html';
+    }
+    
+    // Set admin username
+    document.getElementById('adminUserName').textContent = sessionStorage.getItem('admin_username') || 'Admin';
+    
+    const API_BASE = 'https://deemona-backend.onrender.com';
+    
+    let allUsers = [];
+    let filteredUsers = [];
+    
+    // Initialize
+    loadAdminData();
+    
+    async function loadAdminData() {
+      await loadStats();
+      await loadUsers();
+    }
+    
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_BASE}/v1/admin/stats`, {
+          headers: {
+            'Authorization': 'Bearer admin_authenticated'
+          }
+        });
+        
+        if (response.ok) {
+          const stats = await response.json();
+          renderStats(stats);
+        } else {
+          throw new Error('Failed to fetch stats');
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        document.getElementById('adminStatsGrid').innerHTML = `
+          <div style="grid-column: 1/-1;" class="error-message">
+            <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+            <h3>Failed to Load Statistics</h3>
+            <p style="color: #94a3b8; margin-top: 8px;">Please check your connection and try again.</p>
+            <button onclick="loadStats()" style="margin-top: 16px; padding: 10px 24px; background: rgba(99, 102, 241, 0.15); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; cursor: pointer; font-weight: 600;">
+              🔄 Retry
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    function renderStats(stats) {
+      const html = `
+        <div class="admin-stat-card" style="--card-color: #6366f1">
+          <div class="admin-stat-icon">👥</div>
+          <div class="admin-stat-label">Total Users</div>
+          <div class="admin-stat-value">${stats.totalUsers.toLocaleString()}</div>
+          <div class="admin-stat-delta">+${stats.newThisWeek} this week</div>
+        </div>
+        
+        <div class="admin-stat-card" style="--card-color: #10b981">
+          <div class="admin-stat-icon">✅</div>
+          <div class="admin-stat-label">Verified Users</div>
+          <div class="admin-stat-value">${stats.verifiedUsers.toLocaleString()}</div>
+          <div class="admin-stat-delta">${((stats.verifiedUsers/stats.totalUsers)*100).toFixed(1)}% verified</div>
+        </div>
+        
+        <div class="admin-stat-card" style="--card-color: #f59e0b">
+          <div class="admin-stat-icon">⏳</div>
+          <div class="admin-stat-label">Pending Verification</div>
+          <div class="admin-stat-value">${stats.pendingUsers.toLocaleString()}</div>
+          <div class="admin-stat-delta">${((stats.pendingUsers/stats.totalUsers)*100).toFixed(1)}% pending</div>
+        </div>
+        
+        <div class="admin-stat-card" style="--card-color: #0d9488">
+          <div class="admin-stat-icon">🔥</div>
+          <div class="admin-stat-label">Active Today</div>
+          <div class="admin-stat-value">${stats.activeToday.toLocaleString()}</div>
+          <div class="admin-stat-delta">${((stats.activeToday/stats.totalUsers)*100).toFixed(1)}% active</div>
+        </div>
+      `;
+      
+      document.getElementById('adminStatsGrid').innerHTML = html;
+      console.log('[ADMIN] Stats loaded:', stats);
+    }
+    
+    async function loadUsers() {
+      try {
+        const response = await fetch(`${API_BASE}/v1/admin/users?limit=100`, {
+          headers: {
+            'Authorization': 'Bearer admin_authenticated'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          allUsers = data.users || [];
+          filteredUsers = [...allUsers];
+          renderUsers();
+          console.log('[ADMIN] Users loaded:', allUsers.length);
+        } else {
+          throw new Error('Failed to fetch users');
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('userTableContainer').innerHTML = `
+          <div class="error-message">
+            <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+            <h3>Failed to Load Users</h3>
+            <p style="color: #94a3b8; margin-top: 8px;">Unable to fetch user data from the database.</p>
+            <button onclick="loadUsers()" style="margin-top: 16px; padding: 10px 24px; background: rgba(99, 102, 241, 0.15); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; cursor: pointer; font-weight: 600;">
+              🔄 Retry
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+function renderUsers() {
+  if (filteredUsers.length === 0) {
+    document.getElementById('userTableContainer').innerHTML = `
+      <div class="loading-spinner">
+        <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
+        <p>No users found</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let tableHtml = `
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
+  // ✅ SHOW ALL USERS - removed .slice(0, 50)
+  filteredUsers.forEach(user => {
+    const statusClass = user.status === 'verified' ? 'status-verified' : 
+                       user.status === 'pending' ? 'status-pending' : 'status-suspended';
+    
+    const isSuspended = user.status === 'suspended' || user.is_suspended;
+    
+    // Show shorter ID for display
+    const shortId = user.id.length > 20 ? user.id.substring(0, 8) : user.id;
+    
+    tableHtml += `
+      <tr>
+        <td>#${shortId}</td>
+        <td style="font-weight: 600; color: #e2e8f0;">${user.name || 'N/A'}</td>
+        <td>${user.email}</td>
+        <td><span class="user-status-badge ${statusClass}">${user.status}</span></td>
+        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+        <td>${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</td>
+        <td>
+          ${isSuspended ? 
+            `<button class="admin-action-btn btn-unsuspend" onclick="unsuspendUser('${user.id}')">▶️ Unsuspend</button>` :
+            `<button class="admin-action-btn btn-suspend" onclick="suspendUser('${user.id}')">⏸️ Suspend</button>`
+          }
+          <button class="admin-action-btn btn-delete" onclick="deleteUser('${user.id}', '${user.email}')">🗑️ Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+  
+  tableHtml += `</tbody></table></div>
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing ${filteredUsers.length} users (scroll to see all)
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('userTableContainer').innerHTML = tableHtml;
+}
+    
+    function searchUsers(query) {
+      query = query.toLowerCase();
+      if (!query) {
+        filteredUsers = [...allUsers];
+      } else {
+        filteredUsers = allUsers.filter(user => 
+          user.email.toLowerCase().includes(query) ||
+          (user.name && user.name.toLowerCase().includes(query)) ||
+          user.id.toString().includes(query)
+        );
+      }
+      renderUsers();
+      console.log('[ADMIN] Search:', query, 'Results:', filteredUsers.length);
+    }
+    
+    function switchAdminTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Update tab content
+      document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      console.log('[ADMIN] Switched to tab:', tabName);
+    }
+    
+    async function suspendUser(userId) {
+      if (!confirm('Are you sure you want to suspend user #' + userId + '?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/v1/admin/users/${userId}/suspend`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer admin_authenticated',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          alert('✅ User suspended successfully');
+          await loadUsers();
+        } else {
+          const error = await response.json();
+          alert('❌ Failed to suspend user: ' + (error.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Suspend error:', error);
+        alert('❌ Network error. Please try again.');
+      }
+    }
+    
+    async function unsuspendUser(userId) {
+      if (!confirm('Are you sure you want to unsuspend user #' + userId + '?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/v1/admin/users/${userId}/unsuspend`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer admin_authenticated',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          alert('✅ User unsuspended successfully');
+          await loadUsers();
+        } else {
+          const error = await response.json();
+          alert('❌ Failed to unsuspend user: ' + (error.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Unsuspend error:', error);
+        alert('❌ Network error. Please try again.');
+      }
+    }
+    
+    async function deleteUser(userId, userEmail) {
+      if (!confirm(`⚠️ WARNING: This will permanently delete user #${userId} (${userEmail})\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?`)) {
+        return;
+      }
+      
+      // Double confirmation for delete
+      if (!confirm('Final confirmation: Delete this user permanently?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE}/v1/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer admin_authenticated'
+          }
+        });
+        
+        if (response.ok) {
+          alert('✅ User deleted successfully');
+          await loadUsers();
+        } else {
+          const error = await response.json();
+          alert('❌ Failed to delete user: ' + (error.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('❌ Network error. Please try again.');
+      }
+    }
+    
+    async function exportUsers() {
+      try {
+        window.location.href = `${API_BASE}/v1/admin/export/users`;
+        console.log('[ADMIN] Exporting users...');
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('❌ Failed to export users');
+      }
+    }
+    
+    function handleLogout() {
+      sessionStorage.removeItem('admin_authenticated');
+      sessionStorage.removeItem('admin_username');
+      sessionStorage.removeItem('admin_login_time');
+      window.location.href = '/admin_login.html';
+    }
+  </script>
+</body>
+</html>

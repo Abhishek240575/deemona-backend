@@ -1,0 +1,4 @@
+const r=require('express').Router(),db=require('../../services/database');
+r.get('/',async(req,res)=>{const{page=1,limit=50}=req.query;try{const d=await db.query(`SELECT * FROM incidents WHERE tenant_id=$1 ORDER BY created_at DESC NULLS LAST LIMIT ${limit} OFFSET ${(page-1)*limit}`,[req.tenantId]);res.json({data:d.rows});}catch(e){res.status(500).json({error:e.message});}});
+r.post('/',async(req,res)=>{const b=req.body;try{const d=await db.query(`INSERT INTO incidents(tenant_id,title,description,severity,type,status,reported_by,assigned_to) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,[req.tenantId,b.title,b.description,b.severity,b.type,b.status,b.reported_by,b.assigned_to]);res.status(201).json(d.rows[0]);}catch(e){res.status(500).json({error:e.message});}});
+module.exports=r;
