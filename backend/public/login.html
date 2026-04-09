@@ -1,217 +1,702 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deemona Finance Solution — Sign In</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%230d9488'/><text x='50' y='68' text-anchor='middle' font-size='58' font-weight='700' fill='white' font-family='serif'>D</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#070b14;--accent:#0d9488;--accent2:#0f766e;--accent3:#14b8a6;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--red:#ef4444;--green:#10b981}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.bg-glow{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(13,148,136,.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(14,184,166,.04) 0%,transparent 50%);pointer-events:none}
-.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(148,163,184,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
-.login-container{position:relative;z-index:1;width:100%;max-width:420px;padding:20px}
-.logo-section{text-align:center;margin-bottom:40px}
-.logo-icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#0d9488,#0f766e);display:inline-flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:34px;color:#fff;box-shadow:0 4px 24px rgba(13,148,136,.3);margin-bottom:16px;position:relative}
-.logo-icon::after{content:'';position:absolute;inset:-1px;border-radius:17px;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);pointer-events:none}
-.logo-brand{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,#5eead4,#2dd4bf,#14b8a6,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2}
-.logo-sub{font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin-top:4px}
-.login-card{background:rgba(17,24,39,.7);backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,.08);border-radius:16px;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.4)}
-.login-title{font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:-.3px}
-.login-subtitle{font-size:13px;color:var(--text3);margin-bottom:28px}
-.form-group{margin-bottom:20px}
-.form-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:6px}
-.form-input{width:100%;background:rgba(26,34,54,.8);border:1px solid rgba(148,163,184,.12);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
-.form-input:focus{border-color:var(--accent)}
-.form-input::placeholder{color:var(--text3)}
-.remember-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.remember-label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer}
-.remember-label input{accent-color:var(--accent)}
-.forgot-link{font-size:12px;color:var(--accent3);text-decoration:none;font-weight:500}
-.forgot-link:hover{text-decoration:underline}
-.login-btn{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(13,148,136,.3);letter-spacing:.3px}
-.login-btn:hover{box-shadow:0 6px 24px rgba(13,148,136,.4);transform:translateY(-1px)}
-.login-btn:active{transform:translateY(0)}
-.login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.error-msg{display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--red);font-weight:500}
-.error-msg.show{display:block}
-.success-msg{display:none;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--green);font-weight:500}
-.success-msg.show{display:block}
-.divider{display:flex;align-items:center;gap:12px;margin:24px 0}
-.divider-line{flex:1;height:1px;background:rgba(148,163,184,.1)}
-.divider-text{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:500}
-.demo-btn{width:100%;padding:11px;border:1px solid rgba(148,163,184,.15);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .2s}
-.demo-btn:hover{border-color:rgba(148,163,184,.3);color:var(--text);background:rgba(148,163,184,.04)}
-.footer-text{text-align:center;margin-top:24px;font-size:10px;color:var(--text3);letter-spacing:.5px}
-.api-config{margin-top:20px;padding:12px;background:rgba(26,34,54,.5);border:1px solid rgba(148,163,184,.06);border-radius:8px}
-.api-config label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;display:block;margin-bottom:4px}
-.api-config input{width:100%;background:rgba(7,11,20,.6);border:1px solid rgba(148,163,184,.1);border-radius:6px;padding:8px 10px;color:var(--text);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none}
-.api-config input:focus{border-color:var(--accent)}
-.conn-status{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:var(--text3)}
-.conn-dot{width:6px;height:6px;border-radius:50%}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.login-container{animation:fadeUp .5s ease-out}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Deemona Finance Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group input[type="url"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Connection Status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .conn-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: gray;
+        }
+
+        .conn-text {
+            color: #666;
+        }
+
+        /* Terms Acceptance */
+        .terms-acceptance {
+            margin: 25px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .terms-checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .terms-checkbox-wrapper input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .terms-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .terms-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .terms-text a:hover {
+            border-bottom-color: #667eea;
+        }
+
+        .terms-text .required {
+            color: #dc3545;
+            font-weight: 700;
+        }
+
+        .terms-disclaimer {
+            margin-top: 12px;
+            padding: 12px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #856404;
+        }
+
+        /* Messages */
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .error-msg {
+            background: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .success-msg {
+            background: #dfd;
+            color: #363;
+            border-left: 4px solid #363;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 10000;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            max-width: 900px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .modal-body h3 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .modal-body ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+            text-align: right;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .modal-footer button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #218838;
+        }
+
+        .btn-decline {
+            background: #6c757d;
+            color: white;
+        }
+
+        .warning-box {
+            background: #ffe6e6;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box h4 {
+            color: #dc3545;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            .modal-content {
+                margin: 20px auto;
+            }
+            .modal-body {
+                padding: 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="bg-glow"></div>
-<div class="grid-bg"></div>
+    <div class="login-container">
+        <div class="logo">
+            <h1>Deemona Finance</h1>
+            <p>Enterprise Analytics Platform</p>
+        </div>
 
-<div class="login-container">
-<div class="logo-section">
-  <div class="logo-icon">D</div>
-  <div class="logo-brand">Deemona Finance Solution</div>
-  <div class="logo-sub">Enterprise Command Center</div>
-</div>
+        <div id="errorMsg" class="message error-msg"></div>
+        <div id="successMsg" class="message success-msg"></div>
 
-<div class="login-card">
-  <div class="login-title">Welcome back</div>
-  <div class="login-subtitle">Sign in to access your financial dashboards</div>
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="apiUrl">API Server URL</label>
+                <input type="url" id="apiUrl" placeholder="https://deemona-backend.onrender.com" required>
+                <div class="connection-status">
+                    <div class="conn-dot" id="connDot"></div>
+                    <span class="conn-text" id="connText">Not configured</span>
+                </div>
+            </div>
 
-  <div class="error-msg" id="errorMsg"></div>
-  <div class="success-msg" id="successMsg"></div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required autocomplete="email">
+            </div>
 
-  <form id="loginForm" onsubmit="handleLogin(event)">
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input class="form-input" type="email" id="email" placeholder="admin@deemona.com" required autocomplete="email">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+
+            <!-- TERMS ACCEPTANCE -->
+            <div class="terms-acceptance">
+                <label class="terms-checkbox-wrapper">
+                    <input type="checkbox" id="acceptTerms" required>
+                    <span class="terms-text">
+                        I have read and agree to the 
+                        <a href="#" id="showTermsLink">Terms and Conditions</a>, 
+                        <a href="#" id="showPrivacyLink">Privacy Policy</a>, and 
+                        <a href="#" id="showAupLink">Acceptable Use Policy</a>
+                        <span class="required">*</span>
+                    </span>
+                </label>
+
+                <div class="terms-disclaimer">
+                    <strong>⚠️ Important:</strong> By checking this box, you acknowledge that <strong>the platform owner is NOT responsible for any financial losses</strong> you may incur.
+                </div>
+            </div>
+
+            <button type="submit" id="loginBtn" class="btn btn-primary" disabled>
+                Sign In
+            </button>
+        </form>
+
+        <div class="divider">OR</div>
+
+        <button onclick="enterDemoMode()" class="btn btn-secondary">
+            Enter Demo Mode
+        </button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input class="form-input" type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+
+    <!-- TERMS MODAL -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Terms and Conditions</h2>
+                <button id="closeModal" class="modal-close">&times;</button>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
+            <div class="modal-footer">
+                <button id="acceptTermsButton" class="btn-accept">I Accept</button>
+                <button id="declineTermsButton" class="btn-decline">Close</button>
+            </div>
+        </div>
     </div>
-    <div class="remember-row">
-      <label class="remember-label"><input type="checkbox" id="remember" checked> Remember me</label>
-      <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
-    </div>
-    <button class="login-btn" type="submit" id="loginBtn">Sign In</button>
-  </form>
-
-  <div class="divider"><div class="divider-line"></div><div class="divider-text">or</div><div class="divider-line"></div></div>
-
-  <button class="demo-btn" onclick="enterDemoMode()">Continue in Demo Mode (No Login Required)</button>
-
-  <div class="api-config">
-    <label>API Server URL</label>
-    <input type="text" id="apiUrl" placeholder="http://localhost:3000" value="https://deemona-backend.onrender.com">
-    <div class="conn-status" id="connStatus"><span class="conn-dot" id="connDot" style="background:#64748b"></span> <span id="connText">Not configured</span></div>
-  </div>
-</div>
-<div style="text-align:center;margin-top:20px;font-size:12px;color:var(--text3)">
-  Don't have an account? <a href="signup.html" style="color:var(--accent3);text-decoration:none;font-weight:600">Sign up</a>
-</div>
-
-<div class="footer-text">Deemona Finance Solution · Enterprise Intelligence Platform · &copy; 2026</div>
-</div>
 
 <script>
+// =====================================================
+// TERMS CONTENT
+// =====================================================
+const termsContent = `
+    <h3>CRITICAL LIABILITY DISCLAIMER</h3>
+    <div class="warning-box">
+        <h4>⚠️ NO RESPONSIBILITY FOR FINANCIAL LOSSES</h4>
+        <p><strong>THE OWNER, CREATOR, DEVELOPER, AND OPERATOR OF THIS PLATFORM EXPRESSLY DISCLAIM ALL RESPONSIBILITY AND LIABILITY FOR ANY FINANCIAL LOSSES, DAMAGES, OR ADVERSE OUTCOMES.</strong></p>
+        <ul>
+            <li>Use of this Platform</li>
+            <li>Reliance on data, information, or analytics provided</li>
+            <li>Business decisions made based on Platform content</li>
+            <li>Errors, inaccuracies, or omissions in data</li>
+            <li>System failures or downtime</li>
+        </ul>
+    </div>
+    <h3>USER ASSUMES ALL RISK</h3>
+    <p><strong>BY USING THIS PLATFORM, YOU AGREE THAT:</strong></p>
+    <ul>
+        <li>You use the Platform entirely at your own risk</li>
+        <li>You are solely responsible for all business decisions</li>
+        <li>The Owner shall NOT be held liable for any losses</li>
+        <li>You waive any right to claim damages</li>
+    </ul>
+    <h3>NO FINANCIAL ADVICE</h3>
+    <p><strong>THIS PLATFORM DOES NOT PROVIDE FINANCIAL ADVICE.</strong> Consult qualified professionals for financial decisions.</p>
+`;
+
+const privacyContent = `<h3>Privacy Policy Summary</h3><p>We collect account information and business data you upload. We do NOT sell your data. See full policy for details.</p>`;
+const aupContent = `<h3>Acceptable Use Policy</h3><p>Use the Platform lawfully for business purposes. Do not upload malware, access unauthorized accounts, or violate laws.</p>`;
+
+// =====================================================
+// MODAL FUNCTIONALITY
+// =====================================================
+const termsModal = document.getElementById('termsModal');
+const modalBody = document.getElementById('modalBody');
+const modalTitle = document.getElementById('modalTitle');
+const acceptCheckbox = document.getElementById('acceptTerms');
+const loginBtn = document.getElementById('loginBtn');
+
+document.getElementById('showTermsLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    modalTitle.textContent = 'Terms and Conditions';
+    modalBody.innerHTML = termsContent;
+    termsModal.style.display = 'block';
+});
+
+document.getElementById('showPrivacyLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    modalTitle.textContent = 'Privacy Policy';
+    modalBody.innerHTML = privacyContent;
+    termsModal.style.display = 'block';
+});
+
+document.getElementById('showAupLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    modalTitle.textContent = 'Acceptable Use Policy';
+    modalBody.innerHTML = aupContent;
+    termsModal.style.display = 'block';
+});
+
+document.getElementById('closeModal').addEventListener('click', () => termsModal.style.display = 'none');
+document.getElementById('declineTermsButton').addEventListener('click', () => termsModal.style.display = 'none');
+
+document.getElementById('acceptTermsButton').addEventListener('click', function() {
+    acceptCheckbox.checked = true;
+    loginBtn.disabled = false;
+    termsModal.style.display = 'none';
+    
+    const termsBox = document.querySelector('.terms-acceptance');
+    termsBox.style.background = '#d4edda';
+    termsBox.style.borderColor = '#c3e6cb';
+    setTimeout(() => {
+        termsBox.style.background = '#f8f9fa';
+        termsBox.style.borderColor = '#dee2e6';
+    }, 2000);
+});
+
+termsModal.addEventListener('click', (e) => {
+    if (e.target === termsModal) termsModal.style.display = 'none';
+});
+
+// Enable/disable login button based on checkbox
+acceptCheckbox.addEventListener('change', function() {
+    loginBtn.disabled = !this.checked;
+});
+
+// =====================================================
+// EXISTING DEEMONA LOGIN LOGIC (WITH TERMS ADDED)
+// =====================================================
+
 // Load saved API URL
-//const savedUrl = localStorage.getItem('deemona_api_url') || '';
 const savedUrl = localStorage.getItem('deemona_api_url') || 'https://deemona-backend.onrender.com';
 const savedToken = sessionStorage.getItem('deemona_token');
 document.getElementById('apiUrl').value = savedUrl;
 
 // If already logged in, redirect to dashboard
 if (savedToken) {
-  window.location.href = 'Deemona_Dashboard_v3.html';
+    window.location.href = 'Deemona_Dashboard_v3.html';
 }
 
 // Test connection when URL changes
 let testTimer;
 document.getElementById('apiUrl').addEventListener('input', function() {
-  clearTimeout(testTimer);
-  testTimer = setTimeout(() => testConnection(this.value), 800);
+    clearTimeout(testTimer);
+    testTimer = setTimeout(() => testConnection(this.value), 800);
 });
 
 // Test on load if URL exists
 if (savedUrl) setTimeout(() => testConnection(savedUrl), 500);
 
 async function testConnection(url) {
-  if (!url) {
-    setConnStatus('gray', 'Not configured');
-    return;
-  }
-  setConnStatus('#f59e0b', 'Testing...');
-  try {
-    const res = await fetch(url.replace(/\/+$/, '') + '/v1/health', { signal: AbortSignal.timeout(5000) });
-    if (res.ok) {
-      const data = await res.json();
-      setConnStatus('#10b981', 'Connected — ' + (data.service || 'API') + ' v' + (data.version || '?'));
-      localStorage.setItem('deemona_api_url', url.replace(/\/+$/, ''));
-    } else {
-      setConnStatus('#ef4444', 'Server responded with ' + res.status);
+    if (!url) {
+        setConnStatus('gray', 'Not configured');
+        return;
     }
-  } catch (e) {
-    setConnStatus('#ef4444', 'Cannot connect — ' + (e.message || 'unreachable'));
-  }
+    setConnStatus('#f59e0b', 'Testing...');
+    try {
+        const res = await fetch(url.replace(/\/+$/, '') + '/v1/health', { 
+            signal: AbortSignal.timeout(5000) 
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setConnStatus('#10b981', 'Connected — ' + (data.service || 'API') + ' v' + (data.version || '?'));
+            localStorage.setItem('deemona_api_url', url.replace(/\/+$/, ''));
+        } else {
+            setConnStatus('#ef4444', 'Server responded with ' + res.status);
+        }
+    } catch (e) {
+        setConnStatus('#ef4444', 'Cannot connect — ' + (e.message || 'unreachable'));
+    }
 }
 
 function setConnStatus(color, text) {
-  document.getElementById('connDot').style.background = color;
-  document.getElementById('connText').textContent = text;
+    document.getElementById('connDot').style.background = color;
+    document.getElementById('connText').textContent = text;
 }
 
 async function handleLogin(e) {
-  e.preventDefault();
-  const btn = document.getElementById('loginBtn');
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const apiUrl = document.getElementById('apiUrl').value.replace(/\/+$/, '');
-
-  hideMessages();
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
-
-  if (!apiUrl) {
-    showError('Please enter an API Server URL first');
-    btn.disabled = false; btn.textContent = 'Sign In';
-    return;
-  }
-
-  try {
-    const res = await fetch(apiUrl + '/v1/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-      signal: AbortSignal.timeout(10000)
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Invalid credentials (HTTP ' + res.status + ')');
+    e.preventDefault();
+    
+    const btn = document.getElementById('loginBtn');
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const apiUrl = document.getElementById('apiUrl').value.replace(/\/+$/, '');
+    
+    hideMessages();
+    
+    // ✅ CRITICAL: VALIDATE TERMS ACCEPTANCE
+    if (!acceptCheckbox.checked) {
+        showError('⚠️ You must accept the Terms and Conditions before logging in.');
+        
+        const termsBox = document.querySelector('.terms-acceptance');
+        termsBox.style.background = '#f8d7da';
+        termsBox.style.borderColor = '#dc3545';
+        setTimeout(() => {
+            termsBox.style.background = '#f8f9fa';
+            termsBox.style.borderColor = '#dee2e6';
+        }, 3000);
+        
+        return false;
     }
-
-    const data = await res.json();
-
-    // Store auth data
-    sessionStorage.setItem('deemona_token', data.token);
-    sessionStorage.setItem('deemona_user', JSON.stringify(data.user));
-    sessionStorage.setItem('deemona_dashboards', JSON.stringify(data.accessible_dashboards || []));
-    localStorage.setItem('deemona_api_url', apiUrl);
-    localStorage.setItem('deemona_mode', 'live');
-
-    showSuccess('Welcome, ' + (data.user?.name || email) + '! Redirecting...');
-    setTimeout(() => { window.location.href = 'Deemona_Dashboard_v3.html'; }, 800);
-
-  } catch (err) {
-    showError(err.message || 'Login failed');
-    btn.disabled = false; btn.textContent = 'Sign In';
-  }
+    
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+    
+    if (!apiUrl) {
+        showError('Please enter an API Server URL first');
+        btn.disabled = !acceptCheckbox.checked;
+        btn.textContent = 'Sign In';
+        return;
+    }
+    
+    try {
+        const res = await fetch(apiUrl + '/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email, 
+                password,
+                acceptedTerms: true  // ✅ CRITICAL: Send terms acceptance
+            }),
+            signal: AbortSignal.timeout(10000)
+        });
+        
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Invalid credentials (HTTP ' + res.status + ')');
+        }
+        
+        const data = await res.json();
+        
+        // Store auth data
+        sessionStorage.setItem('deemona_token', data.token);
+        sessionStorage.setItem('deemona_user', JSON.stringify(data.user));
+        sessionStorage.setItem('deemona_dashboards', JSON.stringify(data.accessible_dashboards || []));
+        sessionStorage.setItem('deemona_terms_accepted', 'true');  // ✅ Track acceptance
+        sessionStorage.setItem('deemona_terms_accepted_at', new Date().toISOString());
+        localStorage.setItem('deemona_api_url', apiUrl);
+        localStorage.setItem('deemona_mode', 'live');
+        
+        showSuccess('Welcome, ' + (data.user?.name || email) + '! Redirecting...');
+        setTimeout(() => { 
+            window.location.href = 'Deemona_Dashboard_v3.html'; 
+        }, 800);
+        
+    } catch (err) {
+        showError(err.message || 'Login failed');
+        btn.disabled = !acceptCheckbox.checked;
+        btn.textContent = 'Sign In';
+    }
 }
 
 function enterDemoMode() {
-  localStorage.setItem('deemona_mode', 'demo');
-  sessionStorage.setItem('deemona_token', 'demo-mode');
-  sessionStorage.setItem('deemona_user', JSON.stringify({ name: 'Demo User', role: 'CEO / Board', email: 'demo@deemona.com' }));
-  showSuccess('Entering demo mode...');
-  setTimeout(() => { window.location.href = 'Deemona_Dashboard_v3.html'; }, 500);
+    localStorage.setItem('deemona_mode', 'demo');
+    sessionStorage.setItem('deemona_token', 'demo-mode');
+    sessionStorage.setItem('deemona_user', JSON.stringify({ 
+        name: 'Demo User', 
+        role: 'CEO / Board', 
+        email: 'demo@deemona.com' 
+    }));
+    sessionStorage.setItem('deemona_terms_accepted', 'true');
+    sessionStorage.setItem('deemona_terms_accepted_at', new Date().toISOString());
+    
+    showSuccess('Entering demo mode...');
+    setTimeout(() => { 
+        window.location.href = 'Deemona_Dashboard_v3.html'; 
+    }, 500);
 }
 
-function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.classList.add('show'); }
-function showSuccess(msg) { const el = document.getElementById('successMsg'); el.textContent = msg; el.classList.add('show'); }
-function hideMessages() { document.getElementById('errorMsg').classList.remove('show'); document.getElementById('successMsg').classList.remove('show'); }
+function showError(msg) { 
+    const el = document.getElementById('errorMsg'); 
+    el.textContent = msg; 
+    el.classList.add('show'); 
+}
+
+function showSuccess(msg) { 
+    const el = document.getElementById('successMsg'); 
+    el.textContent = msg; 
+    el.classList.add('show'); 
+}
+
+function hideMessages() { 
+    document.getElementById('errorMsg').classList.remove('show'); 
+    document.getElementById('successMsg').classList.remove('show'); 
+}
 </script>
 </body>
 </html>
