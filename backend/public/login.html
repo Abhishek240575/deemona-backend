@@ -104,6 +104,7 @@
             background: #f8f9fa;
             border-radius: 6px;
             border: 1px solid #dee2e6;
+            transition: all 0.3s;
         }
 
         .terms-checkbox-wrapper {
@@ -394,23 +395,6 @@
                     <span class="conn-text" id="connText">Not configured</span>
                 </div>
             </div>
-			<!-- ADD THIS BEFORE YOUR LOGIN BUTTON -->
-<div class="terms-acceptance">
-    <label class="terms-checkbox-wrapper">
-        <input type="checkbox" id="acceptTerms" required>
-        <span class="terms-text">
-            I have read and agree to the 
-            <a href="#" id="showTermsLink">Terms and Conditions</a>, 
-            <a href="#" id="showPrivacyLink">Privacy Policy</a>, and 
-            <a href="#" id="showAupLink">Acceptable Use Policy</a>
-            <span class="required">*</span>
-        </span>
-    </label>
-
-    <div class="terms-disclaimer">
-        <strong>⚠️ Important:</strong> By checking this box, you acknowledge that <strong>the platform owner is NOT responsible for any financial losses</strong> you may incur.
-    </div>
-</div>
 
             <div class="form-group">
                 <label for="email">Email</label>
@@ -496,8 +480,24 @@ const termsContent = `
     <p><strong>THIS PLATFORM DOES NOT PROVIDE FINANCIAL ADVICE.</strong> Consult qualified professionals for financial decisions.</p>
 `;
 
-const privacyContent = `<h3>Privacy Policy Summary</h3><p>We collect account information and business data you upload. We do NOT sell your data. See full policy for details.</p>`;
-const aupContent = `<h3>Acceptable Use Policy</h3><p>Use the Platform lawfully for business purposes. Do not upload malware, access unauthorized accounts, or violate laws.</p>`;
+const privacyContent = `
+    <h3>Privacy Policy Summary</h3>
+    <p>We collect account information and business data you upload. We do NOT sell your data.</p>
+    <p><strong>Your Rights:</strong> Access, correct, delete your data at any time.</p>
+    <p>See full legal/PRIVACY_POLICY.md for complete details.</p>
+`;
+
+const aupContent = `
+    <h3>Acceptable Use Policy</h3>
+    <p>Use the Platform lawfully for business purposes. Do not:</p>
+    <ul>
+        <li>Upload malware or malicious code</li>
+        <li>Access unauthorized accounts</li>
+        <li>Violate laws or regulations</li>
+        <li>Attempt to breach security</li>
+    </ul>
+    <p>See full legal/ACCEPTABLE_USE_POLICY.md for complete details.</p>
+`;
 
 // =====================================================
 // MODAL FUNCTIONALITY
@@ -508,6 +508,7 @@ const modalTitle = document.getElementById('modalTitle');
 const acceptCheckbox = document.getElementById('acceptTerms');
 const loginBtn = document.getElementById('loginBtn');
 
+// Show terms modal
 document.getElementById('showTermsLink').addEventListener('click', function(e) {
     e.preventDefault();
     modalTitle.textContent = 'Terms and Conditions';
@@ -529,14 +530,22 @@ document.getElementById('showAupLink').addEventListener('click', function(e) {
     termsModal.style.display = 'block';
 });
 
-document.getElementById('closeModal').addEventListener('click', () => termsModal.style.display = 'none');
-document.getElementById('declineTermsButton').addEventListener('click', () => termsModal.style.display = 'none');
+// Close modal
+document.getElementById('closeModal').addEventListener('click', () => {
+    termsModal.style.display = 'none';
+});
 
+document.getElementById('declineTermsButton').addEventListener('click', () => {
+    termsModal.style.display = 'none';
+});
+
+// Accept terms from modal
 document.getElementById('acceptTermsButton').addEventListener('click', function() {
     acceptCheckbox.checked = true;
     loginBtn.disabled = false;
     termsModal.style.display = 'none';
     
+    // Visual feedback
     const termsBox = document.querySelector('.terms-acceptance');
     termsBox.style.background = '#d4edda';
     termsBox.style.borderColor = '#c3e6cb';
@@ -546,6 +555,7 @@ document.getElementById('acceptTermsButton').addEventListener('click', function(
     }, 2000);
 });
 
+// Close modal on outside click
 termsModal.addEventListener('click', (e) => {
     if (e.target === termsModal) termsModal.style.display = 'none';
 });
@@ -556,7 +566,7 @@ acceptCheckbox.addEventListener('change', function() {
 });
 
 // =====================================================
-// EXISTING DEEMONA LOGIN LOGIC (WITH TERMS ADDED)
+// EXISTING DEEMONA LOGIN LOGIC
 // =====================================================
 
 // Load saved API URL
