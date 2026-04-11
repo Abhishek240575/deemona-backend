@@ -4,3 +4,5 @@ deemona_backup_clean.sql
 deemona_render_import.sqlnode_modules/ 
 .env 
 *.log 
+"*.backup" 
+"*.backup2" 
