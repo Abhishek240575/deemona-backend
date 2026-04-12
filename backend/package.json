@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node src/test.js"
+    "test": "node src/test.js",
+    "build": "npm rebuild bcrypt --build-from-source",
+    "postinstall": "npm rebuild bcrypt --build-from-source"
   },
   "keywords": [
     "finance",
