@@ -13,7 +13,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0e27;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,9 +23,10 @@
         }
 
         .signup-container {
-            background: white;
+            background: rgba(20, 25, 45, 0.95);
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(34, 211, 124, 0.2);
             width: 100%;
             max-width: 480px;
             padding: 40px;
@@ -36,14 +38,15 @@
         }
 
         .logo h1 {
-            color: #667eea;
+            color: #22d37c;
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(34, 211, 124, 0.3);
         }
 
         .logo p {
-            color: #666;
+            color: #8b92a7;
             font-size: 14px;
         }
 
@@ -54,7 +57,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #22d37c;
             font-weight: 500;
             font-size: 14px;
         }
@@ -64,24 +67,37 @@
         .form-group input[type="password"] {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e1e8ed;
+            background: rgba(15, 20, 35, 0.6);
+            border: 2px solid rgba(34, 211, 124, 0.3);
             border-radius: 6px;
             font-size: 15px;
+            color: #fff;
             transition: all 0.3s;
+        }
+
+        .form-group input::placeholder {
+            color: #5a6278;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #22d37c;
+            background: rgba(15, 20, 35, 0.8);
+            box-shadow: 0 0 0 3px rgba(34, 211, 124, 0.1);
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #8b92a7;
+            margin-top: 5px;
         }
 
         .terms-acceptance {
             margin: 25px 0;
             padding: 15px;
-            background: #f8f9fa;
+            background: rgba(34, 211, 124, 0.05);
             border-radius: 6px;
-            border: 1px solid #dee2e6;
+            border: 1px solid rgba(34, 211, 124, 0.2);
             transition: all 0.3s;
         }
 
@@ -99,16 +115,17 @@
             height: 20px;
             cursor: pointer;
             flex-shrink: 0;
+            accent-color: #22d37c;
         }
 
         .terms-text {
             font-size: 14px;
             line-height: 1.6;
-            color: #495057;
+            color: #b4bac9;
         }
 
         .terms-text a {
-            color: #667eea;
+            color: #22d37c;
             text-decoration: none;
             font-weight: 500;
             border-bottom: 1px solid transparent;
@@ -116,22 +133,22 @@
         }
 
         .terms-text a:hover {
-            border-bottom-color: #667eea;
+            border-bottom-color: #22d37c;
         }
 
         .terms-text .required {
-            color: #dc3545;
+            color: #ef4444;
             font-weight: 700;
         }
 
         .terms-disclaimer {
             margin-top: 12px;
             padding: 12px;
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
             font-size: 13px;
             line-height: 1.5;
-            color: #856404;
+            color: #fbbf24;
         }
 
         .message {
@@ -152,15 +169,15 @@
         }
 
         .error-msg {
-            background: #fee;
-            color: #c33;
-            border-left: 4px solid #c33;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-left: 4px solid #ef4444;
         }
 
         .success-msg {
-            background: #dfd;
-            color: #363;
-            border-left: 4px solid #363;
+            background: rgba(34, 211, 124, 0.1);
+            color: #22d37c;
+            border-left: 4px solid #22d37c;
         }
 
         .btn {
@@ -176,50 +193,46 @@
         }
 
         .btn-primary {
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, #22d37c 0%, #1ba35c 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(34, 211, 124, 0.3);
         }
 
         .btn-primary:hover:not(:disabled) {
-            background: #5568d3;
+            background: linear-gradient(135deg, #1ba35c 0%, #158a4d 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 6px 20px rgba(34, 211, 124, 0.4);
         }
 
         .btn-primary:disabled {
-            background: #cbd5e0;
+            background: rgba(107, 114, 128, 0.3);
             cursor: not-allowed;
             opacity: 0.6;
+            box-shadow: none;
         }
 
         .login-link {
             text-align: center;
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid rgba(34, 211, 124, 0.2);
         }
 
         .login-link p {
-            color: #666;
+            color: #8b92a7;
             font-size: 14px;
         }
 
         .login-link a {
-            color: #667eea;
+            color: #22d37c;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.2s;
         }
 
         .login-link a:hover {
-            color: #5568d3;
+            color: #1ba35c;
             text-decoration: underline;
-        }
-
-        .password-hint {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
         }
 
         .modal {
@@ -229,18 +242,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 10000;
             overflow: auto;
             padding: 20px;
         }
 
         .modal-content {
-            background: white;
+            background: #14192d;
             margin: 50px auto;
             max-width: 900px;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(34, 211, 124, 0.2);
             animation: modalSlideIn 0.3s ease-out;
         }
 
@@ -251,7 +265,7 @@
 
         .modal-header {
             padding: 25px 30px;
-            background: #667eea;
+            background: linear-gradient(135deg, #22d37c 0%, #1ba35c 100%);
             color: white;
             border-radius: 12px 12px 0 0;
             display: flex;
@@ -289,11 +303,11 @@
             overflow-y: auto;
             font-size: 15px;
             line-height: 1.7;
-            color: #333;
+            color: #b4bac9;
         }
 
         .modal-body h3 {
-            color: #667eea;
+            color: #22d37c;
             margin-top: 25px;
             margin-bottom: 15px;
         }
@@ -305,10 +319,10 @@
 
         .modal-footer {
             padding: 20px 30px;
-            background: #f8f9fa;
+            background: rgba(15, 20, 35, 0.5);
             border-radius: 0 0 12px 12px;
             text-align: right;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid rgba(34, 211, 124, 0.2);
         }
 
         .modal-footer button {
@@ -323,29 +337,29 @@
         }
 
         .btn-accept {
-            background: #28a745;
+            background: linear-gradient(135deg, #22d37c 0%, #1ba35c 100%);
             color: white;
         }
 
         .btn-accept:hover {
-            background: #218838;
+            background: linear-gradient(135deg, #1ba35c 0%, #158a4d 100%);
         }
 
         .btn-decline {
-            background: #6c757d;
-            color: white;
+            background: rgba(107, 114, 128, 0.2);
+            color: #8b92a7;
         }
 
         .warning-box {
-            background: #ffe6e6;
-            border-left: 4px solid #dc3545;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
             padding: 20px;
             margin: 20px 0;
             border-radius: 4px;
         }
 
         .warning-box h4 {
-            color: #dc3545;
+            color: #ef4444;
             margin-top: 0;
             margin-bottom: 10px;
         }
@@ -377,23 +391,23 @@
         <form onsubmit="handleSignup(event)">
             <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" id="name" required autocomplete="name">
+                <input type="text" id="name" required autocomplete="name" placeholder="John Doe">
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" required autocomplete="email">
+                <input type="email" id="email" required autocomplete="email" placeholder="your@email.com">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" required autocomplete="new-password" minlength="8">
+                <input type="password" id="password" required autocomplete="new-password" minlength="8" placeholder="••••••••">
                 <div class="password-hint">Minimum 8 characters</div>
             </div>
 
             <div class="form-group">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" required autocomplete="new-password">
+                <input type="password" id="confirmPassword" required autocomplete="new-password" placeholder="••••••••">
             </div>
 
             <!-- TERMS ACCEPTANCE -->
@@ -410,7 +424,7 @@
                 </label>
 
                 <div class="terms-disclaimer">
-                    <strong>⚠️ Important:</strong> By creating an account, you acknowledge that <strong>the platform owner is NOT responsible for any financial losses</strong> you may incur while using this platform.
+                    <strong>⚠️ Important:</strong> By creating an account, you acknowledge that <strong>the platform owner is NOT responsible for any financial losses</strong> you may incur.
                 </div>
             </div>
 
@@ -510,11 +524,11 @@ document.getElementById('acceptTermsButton').addEventListener('click', function(
     termsModal.style.display = 'none';
     
     const termsBox = document.querySelector('.terms-acceptance');
-    termsBox.style.background = '#d4edda';
-    termsBox.style.borderColor = '#c3e6cb';
+    termsBox.style.background = 'rgba(34, 211, 124, 0.15)';
+    termsBox.style.borderColor = '#22d37c';
     setTimeout(() => {
-        termsBox.style.background = '#f8f9fa';
-        termsBox.style.borderColor = '#dee2e6';
+        termsBox.style.background = 'rgba(34, 211, 124, 0.05)';
+        termsBox.style.borderColor = 'rgba(34, 211, 124, 0.2)';
     }, 2000);
 });
 
@@ -538,29 +552,26 @@ async function handleSignup(e) {
     
     hideMessages();
     
-    // Validate terms acceptance
     if (!acceptCheckbox.checked) {
         showError('⚠️ You must accept the Terms and Conditions to create an account.');
         
         const termsBox = document.querySelector('.terms-acceptance');
-        termsBox.style.background = '#f8d7da';
-        termsBox.style.borderColor = '#dc3545';
+        termsBox.style.background = 'rgba(239, 68, 68, 0.15)';
+        termsBox.style.borderColor = '#ef4444';
         setTimeout(() => {
-            termsBox.style.background = '#f8f9fa';
-            termsBox.style.borderColor = '#dee2e6';
+            termsBox.style.background = 'rgba(34, 211, 124, 0.05)';
+            termsBox.style.borderColor = 'rgba(34, 211, 124, 0.2)';
         }, 3000);
         
         return false;
     }
     
-    // Validate passwords match
     if (password !== confirmPassword) {
         showError('Passwords do not match!');
         document.getElementById('confirmPassword').focus();
         return false;
     }
     
-    // Validate password length
     if (password.length < 8) {
         showError('Password must be at least 8 characters long!');
         document.getElementById('password').focus();
@@ -595,7 +606,6 @@ async function handleSignup(e) {
         
         showSuccess('Account created successfully! Redirecting to login...');
         
-        // Redirect to login page after 2 seconds
         setTimeout(() => {
             window.location.href = 'login.html';
         }, 2000);
