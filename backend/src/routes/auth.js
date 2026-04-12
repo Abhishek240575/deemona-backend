@@ -71,6 +71,7 @@ router.post('/login', async (req, res) => {
   }
 });
 // POST /v1/auth/signup
+// POST /v1/auth/signup
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, acceptedTerms, termsAcceptedAt } = req.body;
@@ -125,7 +126,7 @@ router.post('/signup', async (req, res) => {
     await db.query('BEGIN');
     
     try {
-      // Create new tenant - ONLY ESSENTIAL COLUMNS
+      // Create new tenant
       const tenantResult = await db.query(
         `INSERT INTO tenants 
          (name, slug, plan, status, primary_color, max_users, max_dashboards) 
@@ -144,18 +145,9 @@ router.post('/signup', async (req, res) => {
       
       const tenantId = tenantResult.rows[0].id;
       
-      // Get default role
-      const defaultRole = await db.query(
-        `SELECT id FROM roles WHERE name IN ('user', 'viewer', 'member') 
-         ORDER BY CASE name WHEN 'user' THEN 1 WHEN 'member' THEN 2 ELSE 3 END 
-         LIMIT 1`
-      );
-      
-      if (defaultRole.rows.length === 0) {
-        throw new Error('No default role found');
-      }
-      
-      const roleId = defaultRole.rows[0].id;
+      // Assign role ID 1 (CFO) to new users
+      // You can change this to any role ID you prefer
+      const roleId = 1;
       
       // Insert new user
       const userResult = await db.query(
@@ -202,7 +194,6 @@ router.post('/signup', async (req, res) => {
     });
   }
 });
-// POST /v1/auth/signup
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, acceptedTerms, termsAcceptedAt } = req.body;
