@@ -77,7 +77,6 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        /* Connection Status */
         .connection-status {
             display: flex;
             align-items: center;
@@ -97,7 +96,6 @@
             color: #666;
         }
 
-        /* Terms Acceptance */
         .terms-acceptance {
             margin: 25px 0;
             padding: 15px;
@@ -156,7 +154,6 @@
             color: #856404;
         }
 
-        /* Messages */
         .message {
             padding: 12px 16px;
             border-radius: 6px;
@@ -186,7 +183,6 @@
             border-left: 4px solid #363;
         }
 
-        /* Buttons */
         .btn {
             width: 100%;
             padding: 14px;
@@ -232,7 +228,30 @@
             font-size: 14px;
         }
 
-        /* Modal */
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .signup-link p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .signup-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .signup-link a:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -361,7 +380,6 @@
             margin-bottom: 10px;
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
             .login-container {
                 padding: 30px 20px;
@@ -434,6 +452,14 @@
         <button onclick="enterDemoMode()" class="btn btn-secondary">
             Enter Demo Mode
         </button>
+
+        <!-- CREATE ACCOUNT LINK -->
+        <div class="signup-link">
+            <p>
+                Don't have an account? 
+                <a href="signup.html">Create Account</a>
+            </p>
+        </div>
     </div>
 
     <!-- TERMS MODAL -->
@@ -452,9 +478,7 @@
     </div>
 
 <script>
-// =====================================================
 // TERMS CONTENT
-// =====================================================
 const termsContent = `
     <h3>CRITICAL LIABILITY DISCLAIMER</h3>
     <div class="warning-box">
@@ -480,35 +504,16 @@ const termsContent = `
     <p><strong>THIS PLATFORM DOES NOT PROVIDE FINANCIAL ADVICE.</strong> Consult qualified professionals for financial decisions.</p>
 `;
 
-const privacyContent = `
-    <h3>Privacy Policy Summary</h3>
-    <p>We collect account information and business data you upload. We do NOT sell your data.</p>
-    <p><strong>Your Rights:</strong> Access, correct, delete your data at any time.</p>
-    <p>See full legal/PRIVACY_POLICY.md for complete details.</p>
-`;
+const privacyContent = `<h3>Privacy Policy Summary</h3><p>We collect account information and business data you upload. We do NOT sell your data.</p><p><strong>Your Rights:</strong> Access, correct, delete your data at any time.</p>`;
+const aupContent = `<h3>Acceptable Use Policy</h3><p>Use the Platform lawfully for business purposes. Do not upload malware, access unauthorized accounts, or violate laws.</p>`;
 
-const aupContent = `
-    <h3>Acceptable Use Policy</h3>
-    <p>Use the Platform lawfully for business purposes. Do not:</p>
-    <ul>
-        <li>Upload malware or malicious code</li>
-        <li>Access unauthorized accounts</li>
-        <li>Violate laws or regulations</li>
-        <li>Attempt to breach security</li>
-    </ul>
-    <p>See full legal/ACCEPTABLE_USE_POLICY.md for complete details.</p>
-`;
-
-// =====================================================
 // MODAL FUNCTIONALITY
-// =====================================================
 const termsModal = document.getElementById('termsModal');
 const modalBody = document.getElementById('modalBody');
 const modalTitle = document.getElementById('modalTitle');
 const acceptCheckbox = document.getElementById('acceptTerms');
 const loginBtn = document.getElementById('loginBtn');
 
-// Show terms modal
 document.getElementById('showTermsLink').addEventListener('click', function(e) {
     e.preventDefault();
     modalTitle.textContent = 'Terms and Conditions';
@@ -530,22 +535,14 @@ document.getElementById('showAupLink').addEventListener('click', function(e) {
     termsModal.style.display = 'block';
 });
 
-// Close modal
-document.getElementById('closeModal').addEventListener('click', () => {
-    termsModal.style.display = 'none';
-});
+document.getElementById('closeModal').addEventListener('click', () => termsModal.style.display = 'none');
+document.getElementById('declineTermsButton').addEventListener('click', () => termsModal.style.display = 'none');
 
-document.getElementById('declineTermsButton').addEventListener('click', () => {
-    termsModal.style.display = 'none';
-});
-
-// Accept terms from modal
 document.getElementById('acceptTermsButton').addEventListener('click', function() {
     acceptCheckbox.checked = true;
     loginBtn.disabled = false;
     termsModal.style.display = 'none';
     
-    // Visual feedback
     const termsBox = document.querySelector('.terms-acceptance');
     termsBox.style.background = '#d4edda';
     termsBox.style.borderColor = '#c3e6cb';
@@ -555,38 +552,29 @@ document.getElementById('acceptTermsButton').addEventListener('click', function(
     }, 2000);
 });
 
-// Close modal on outside click
 termsModal.addEventListener('click', (e) => {
     if (e.target === termsModal) termsModal.style.display = 'none';
 });
 
-// Enable/disable login button based on checkbox
 acceptCheckbox.addEventListener('change', function() {
     loginBtn.disabled = !this.checked;
 });
 
-// =====================================================
 // EXISTING DEEMONA LOGIN LOGIC
-// =====================================================
-
-// Load saved API URL
 const savedUrl = localStorage.getItem('deemona_api_url') || 'https://deemona-backend.onrender.com';
 const savedToken = sessionStorage.getItem('deemona_token');
 document.getElementById('apiUrl').value = savedUrl;
 
-// If already logged in, redirect to dashboard
 if (savedToken) {
     window.location.href = 'Deemona_Dashboard_v3.html';
 }
 
-// Test connection when URL changes
 let testTimer;
 document.getElementById('apiUrl').addEventListener('input', function() {
     clearTimeout(testTimer);
     testTimer = setTimeout(() => testConnection(this.value), 800);
 });
 
-// Test on load if URL exists
 if (savedUrl) setTimeout(() => testConnection(savedUrl), 500);
 
 async function testConnection(url) {
@@ -626,7 +614,6 @@ async function handleLogin(e) {
     
     hideMessages();
     
-    // ✅ CRITICAL: VALIDATE TERMS ACCEPTANCE
     if (!acceptCheckbox.checked) {
         showError('⚠️ You must accept the Terms and Conditions before logging in.');
         
@@ -658,7 +645,7 @@ async function handleLogin(e) {
             body: JSON.stringify({ 
                 email, 
                 password,
-                acceptedTerms: true  // ✅ CRITICAL: Send terms acceptance
+                acceptedTerms: true
             }),
             signal: AbortSignal.timeout(10000)
         });
@@ -670,11 +657,10 @@ async function handleLogin(e) {
         
         const data = await res.json();
         
-        // Store auth data
         sessionStorage.setItem('deemona_token', data.token);
         sessionStorage.setItem('deemona_user', JSON.stringify(data.user));
         sessionStorage.setItem('deemona_dashboards', JSON.stringify(data.accessible_dashboards || []));
-        sessionStorage.setItem('deemona_terms_accepted', 'true');  // ✅ Track acceptance
+        sessionStorage.setItem('deemona_terms_accepted', 'true');
         sessionStorage.setItem('deemona_terms_accepted_at', new Date().toISOString());
         localStorage.setItem('deemona_api_url', apiUrl);
         localStorage.setItem('deemona_mode', 'live');
