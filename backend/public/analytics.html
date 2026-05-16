@@ -572,6 +572,7 @@ const API_BASE = localStorage.getItem('deemona_api_url') || 'https://deemona-bac
 const TOKEN    = sessionStorage.getItem('deemona_token') || '';
 
 const HEADERS  = {
+  'X-API-Key': '02November@2012',
   'Content-Type': 'application/json',
   ...(TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {})
 };
