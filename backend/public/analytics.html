@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deemona — Analytics & Activity Logs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0f1e;--bg2:#0d1526;--bg3:#111c35;
+  --surface:#152038;--surface2:#1c2d4a;--surface3:#243554;
+  --border:#1e3358;--border2:#2a4472;
+  --green:#10b981;--green-d:#059669;--green-l:#d1fae5;
+  --blue:#3b82f6;--blue-l:#dbeafe;
+  --amber:#f59e0b;--amber-l:#fef3c7;
+  --red:#ef4444;--red-l:#fee2e2;
+  --purple:#8b5cf6;--purple-l:#ede9fe;
+  --cyan:#06b6d4;--cyan-l:#cffafe;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+  --radius:10px;--radius-sm:6px;--radius-lg:16px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --header-h:60px;--sidebar-w:220px
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overflow:hidden}
+
+/* ── Layout ── */
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* ── Header ── */
+.header{
+  height:var(--header-h);display:flex;align-items:center;gap:16px;
+  padding:0 24px;background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;position:relative;z-index:20
+}
+.header-logo{display:flex;align-items:center;gap:10px}
+.logo-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--green-d));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;color:#fff;letter-spacing:-0.5px;flex-shrink:0
+}
+.logo-text{font-size:17px;font-weight:600;letter-spacing:-0.3px}
+.logo-text span{color:var(--green)}
+.header-divider{width:1px;height:24px;background:var(--border);margin:0 4px}
+.page-title{font-size:14px;font-weight:500;color:var(--text2)}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.live-badge{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);
+  color:var(--green);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border2);
+  background:var(--surface);color:var(--text2);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .15s
+}
+.btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{background:var(--green-d);border-color:var(--green-d);color:#fff}
+.nav-link{
+  padding:6px 12px;border-radius:var(--radius-sm);color:var(--text2);
+  font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none
+}
+.nav-link:hover{background:var(--surface2);color:var(--text)}
+
+/* ── Main body ── */
+.body-wrap{display:flex;flex:1;overflow:hidden}
+
+/* ── Side tabs ── */
+.sidetabs{
+  width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);
+  flex-shrink:0;padding:16px 10px;display:flex;flex-direction:column;gap:4px;overflow-y:auto
+}
+.sidetab{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);
+  cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s
+}
+.sidetab:hover{background:var(--surface2);color:var(--text)}
+.sidetab.active{background:rgba(16,185,129,.15);color:var(--green);border-left:2px solid var(--green);padding-left:10px}
+.sidetab-icon{width:18px;text-align:center;font-size:15px;flex-shrink:0}
+.sidetab-count{
+  margin-left:auto;background:var(--surface3);color:var(--text2);
+  font-size:11px;padding:2px 7px;border-radius:20px;font-family:var(--mono)
+}
+.sidetab.active .sidetab-count{background:rgba(16,185,129,.2);color:var(--green)}
+.sidetab-section{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:12px 12px 4px}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;padding:24px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── KPI Cards ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:18px 20px;position:relative;overflow:hidden;transition:border-color .15s
+}
+.kpi-card:hover{border-color:var(--border2)}
+.kpi-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--card-accent,var(--green))
+}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
+.kpi-value{font-size:28px;font-weight:600;letter-spacing:-1px;line-height:1;margin-bottom:6px;font-family:var(--mono)}
+.kpi-meta{font-size:12px;color:var(--text2)}
+.kpi-meta .up{color:var(--green)}
+.kpi-meta .down{color:var(--red)}
+.kpi-meta .neutral{color:var(--text2)}
+
+/* ── Charts ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.charts-grid.full{grid-template-columns:1fr}
+.chart-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px
+}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.chart-title{font-size:14px;font-weight:600}
+.chart-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.chart-controls{display:flex;gap:6px}
+.chart-pill{
+  padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;
+  border:1px solid var(--border);color:var(--text2);cursor:pointer;background:transparent;transition:all .15s
+}
+.chart-pill.active{background:rgba(16,185,129,.15);color:var(--green);border-color:rgba(16,185,129,.4)}
+canvas{max-height:240px}
+
+/* ── Filters bar ── */
+.filters-bar{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap
+}
+.filter-input{
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);padding:7px 12px;font-size:13px;font-family:var(--font);outline:none;
+  transition:border-color .15s
+}
+.filter-input:focus{border-color:var(--green)}
+.filter-input::placeholder{color:var(--text3)}
+.filter-input.search{flex:1;min-width:200px}
+select.filter-input option{background:var(--bg3)}
+.filter-sep{width:1px;height:28px;background:var(--border);flex-shrink:0}
+.result-count{margin-left:auto;font-size:12px;color:var(--text2)}
+
+/* ── Table ── */
+.table-wrap{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  overflow:hidden
+}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{
+  padding:11px 14px;text-align:left;font-size:11px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--text2);
+  border-bottom:1px solid var(--border);white-space:nowrap
+}
+td{
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  color:var(--text);vertical-align:middle
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.td-mono{font-family:var(--mono);font-size:12px}
+.td-time{font-family:var(--mono);font-size:11px;color:var(--text2);white-space:nowrap}
+
+/* ── Badges ── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap
+}
+.badge-green{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.badge-amber{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.badge-blue{background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.3)}
+.badge-purple{background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.3)}
+.badge-cyan{background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3)}
+.badge-gray{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.3)}
+
+/* ── Live log feed ── */
+.live-feed{
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);
+  font-family:var(--mono);font-size:12px;height:240px;overflow-y:auto;padding:12px 14px
+}
+.feed-entry{
+  display:flex;gap:12px;padding:4px 0;border-bottom:1px solid rgba(30,51,88,.5);
+  animation:fadeIn .3s ease
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.feed-entry:last-child{border-bottom:none}
+.feed-time{color:var(--text3);min-width:80px;flex-shrink:0}
+.feed-user{color:var(--green);min-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feed-action{flex:1}
+
+/* ── Pagination ── */
+.pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;background:var(--surface2);border-top:1px solid var(--border)
+}
+.pag-info{font-size:12px;color:var(--text2)}
+.pag-btns{display:flex;gap:6px}
+.pag-btn{
+  padding:5px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--surface);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s
+}
+.pag-btn:hover:not(:disabled){background:var(--surface3);color:var(--text);border-color:var(--border2)}
+.pag-btn:disabled{opacity:.4;cursor:not-allowed}
+.pag-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ── Loading ── */
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text2);padding:40px}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:10px}
+.empty-text{font-size:14px;margin-bottom:4px;color:var(--text2)}
+.empty-sub{font-size:12px}
+
+/* ── User row details ── */
+.user-cell{display:flex;align-items:center;gap:8px}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;background:var(--surface3);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* ── Section heading ── */
+.section-heading{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:16px
+}
+.section-title{font-size:15px;font-weight:600}
+.section-sub{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .sidetabs{display:none}
+  .charts-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-mark">D</div>
+    <div>
+      <div class="logo-text">Deemona <span>Finance</span></div>
+    </div>
+  </div>
+  <div class="header-divider"></div>
+  <div class="page-title">Analytics &amp; Activity Logs</div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div><span id="liveStatus">Connecting…</span></div>
+    <a href="index.html" class="nav-link">← Dashboard</a>
+    <a href="admin_panel.html" class="nav-link">Admin Panel</a>
+    <button class="btn btn-green" onclick="exportLogs()">⬇ Export CSV</button>
+  </div>
+</header>
+
+<!-- ══ BODY ════════════════════════════════════════════ -->
+<div class="body-wrap">
+
+  <!-- Side tabs -->
+  <nav class="sidetabs">
+    <div class="sidetab-section">Analytics</div>
+    <div class="sidetab active" data-panel="overview" onclick="switchPanel(this,'overview')">
+      <span class="sidetab-icon">📊</span> Overview
+    </div>
+    <div class="sidetab" data-panel="users" onclick="switchPanel(this,'users')">
+      <span class="sidetab-icon">👥</span> Users
+    </div>
+    <div class="sidetab" data-panel="sessions" onclick="switchPanel(this,'sessions')">
+      <span class="sidetab-icon">🔐</span> Sessions &amp; Logins
+    </div>
+    <div class="sidetab" data-panel="dashboards" onclick="switchPanel(this,'dashboards')">
+      <span class="sidetab-icon">📈</span> Dashboard Usage
+    </div>
+
+    <div class="sidetab-section">Logs</div>
+    <div class="sidetab" data-panel="activitylog" onclick="switchPanel(this,'activitylog')">
+      <span class="sidetab-icon">📋</span> Activity Log
+      <span class="sidetab-count" id="logCount">—</span>
+    </div>
+    <div class="sidetab" data-panel="livefeed" onclick="switchPanel(this,'livefeed')">
+      <span class="sidetab-icon">⚡</span> Live Feed
+    </div>
+    <div class="sidetab" data-panel="exports" onclick="switchPanel(this,'exports')">
+      <span class="sidetab-icon">📤</span> Export History
+    </div>
+  </nav>
+
+  <!-- Content panels -->
+  <main class="content">
+
+    <!-- ═══ OVERVIEW PANEL ═══════════════════════════════════ -->
+    <div class="panel active" id="panel-overview">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">Platform Overview</div>
+          <div class="section-sub" id="overviewUpdated">Loading…</div>
+        </div>
+        <button class="btn" onclick="loadOverview()">↻ Refresh</button>
+      </div>
+
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="loading"><div class="spinner"></div> Loading KPIs…</div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">User Registrations</div>
+              <div class="chart-sub">Daily signups over time</div>
+            </div>
+            <div class="chart-controls">
+              <button class="chart-pill active" onclick="setTrendDays(7,this)">7d</button>
+              <button class="chart-pill" onclick="setTrendDays(30,this)">30d</button>
+              <button class="chart-pill" onclick="setTrendDays(90,this)">90d</button>
+            </div>
+          </div>
+          <canvas id="regChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Login Activity</div>
+              <div class="chart-sub">Success vs failed attempts</div>
+            </div>
+            <div class="chart-controls">
+              <button class="chart-pill active" onclick="setLoginDays(7,this)">7d</button>
+              <button class="chart-pill" onclick="setLoginDays(14,this)">14d</button>
+              <button class="chart-pill" onclick="setLoginDays(30,this)">30d</button>
+            </div>
+          </div>
+          <canvas id="loginChart"></canvas>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Role Distribution</div>
+              <div class="chart-sub">Users by assigned role</div>
+            </div>
+          </div>
+          <canvas id="roleChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Sessions by Hour</div>
+              <div class="chart-sub">Last 7 days activity pattern</div>
+            </div>
+          </div>
+          <canvas id="hourChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ USERS PANEL ═══════════════════════════════════════ -->
+    <div class="panel" id="panel-users">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">User Analytics</div>
+          <div class="section-sub">Registration trends, verification status, role breakdown</div>
+        </div>
+        <button class="btn" onclick="loadUserCharts()">↻ Refresh</button>
+      </div>
+      <div class="kpi-grid" id="userKpis"></div>
+      <div class="charts-grid full">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Registration Trend</div>
+              <div class="chart-sub">New users per day</div>
+            </div>
+            <div class="chart-controls">
+              <button class="chart-pill active" onclick="setUserTrendDays(30,this)">30d</button>
+              <button class="chart-pill" onclick="setUserTrendDays(60,this)">60d</button>
+              <button class="chart-pill" onclick="setUserTrendDays(90,this)">90d</button>
+            </div>
+          </div>
+          <canvas id="userTrendChart" style="max-height:280px"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SESSIONS PANEL ════════════════════════════════════ -->
+    <div class="panel" id="panel-sessions">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">Sessions &amp; Login Activity</div>
+          <div class="section-sub">Authentication metrics and session patterns</div>
+        </div>
+      </div>
+      <div class="kpi-grid" id="sessionKpis"></div>
+      <div class="charts-grid full">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Login Activity (30 days)</div>
+              <div class="chart-sub">Successful logins vs failed attempts</div>
+            </div>
+          </div>
+          <canvas id="sessionLoginChart" style="max-height:260px"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DASHBOARDS PANEL ══════════════════════════════════ -->
+    <div class="panel" id="panel-dashboards">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">Dashboard Usage</div>
+          <div class="section-sub">Most viewed dashboards and unique users</div>
+        </div>
+      </div>
+      <div class="charts-grid full">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Top 15 Dashboards by Views</div></div>
+          </div>
+          <canvas id="dashUsageChart" style="max-height:320px"></canvas>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:16px">
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Dashboard</th><th>Category</th>
+              <th>Total Views</th><th>Unique Users</th><th>Last Accessed</th>
+            </tr></thead>
+            <tbody id="dashUsageTable"><tr><td colspan="6"><div class="loading"><div class="spinner"></div> Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ACTIVITY LOG PANEL ════════════════════════════════ -->
+    <div class="panel" id="panel-activitylog">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">Activity Log</div>
+          <div class="section-sub">Full audit trail — every user action recorded</div>
+        </div>
+        <button class="btn btn-green" onclick="exportLogs()">⬇ Export CSV</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <input type="text" class="filter-input search" id="logSearch"
+          placeholder="🔍  Search by email, action, IP…" oninput="debounceFilter()">
+        <div class="filter-sep"></div>
+        <select class="filter-input" id="actionFilter" onchange="applyFilters()">
+          <option value="all">All Actions</option>
+        </select>
+        <input type="date" class="filter-input" id="fromDate" onchange="applyFilters()">
+        <input type="date" class="filter-input" id="toDate" onchange="applyFilters()">
+        <button class="btn" onclick="clearFilters()">✕ Clear</button>
+        <div class="result-count" id="resultCount">— results</div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Time</th><th>User</th><th>Role</th>
+              <th>Action</th><th>Entity</th><th>IP Address</th><th>Tenant</th>
+            </tr></thead>
+            <tbody id="logTableBody">
+              <tr><td colspan="7"><div class="loading"><div class="spinner"></div> Loading activity logs…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <div class="pag-info" id="pagInfo">—</div>
+          <div class="pag-btns">
+            <button class="pag-btn" id="prevBtn" onclick="prevPage()" disabled>← Prev</button>
+            <span id="pagNums" style="display:flex;gap:4px"></span>
+            <button class="pag-btn" id="nextBtn" onclick="nextPage()" disabled>Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LIVE FEED PANEL ═══════════════════════════════════ -->
+    <div class="panel" id="panel-livefeed">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">Live Activity Feed</div>
+          <div class="section-sub">Real-time events — auto-refreshes every 5 seconds</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="live-badge"><div class="live-dot"></div> Live</div>
+          <button class="btn" onclick="toggleFeedPause()" id="feedPauseBtn">⏸ Pause</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="liveKpis" style="margin-bottom:16px"></div>
+
+      <div class="chart-card" style="margin-bottom:16px">
+        <div class="chart-header">
+          <div><div class="chart-title">Recent Actions Distribution</div></div>
+        </div>
+        <canvas id="liveActionChart" style="max-height:200px"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header" style="margin-bottom:12px">
+          <div class="chart-title">⚡ Live Event Stream</div>
+          <button class="btn" onclick="clearFeed()">Clear</button>
+        </div>
+        <div class="live-feed" id="liveFeed">
+          <div class="loading"><div class="spinner"></div> Connecting to live feed…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EXPORTS PANEL ═════════════════════════════════════ -->
+    <div class="panel" id="panel-exports">
+      <div class="section-heading">
+        <div>
+          <div class="section-title">Export History</div>
+          <div class="section-sub">All report exports and data downloads</div>
+        </div>
+      </div>
+      <div class="kpi-grid" id="exportKpis"></div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Exports by Format</div></div>
+          </div>
+          <canvas id="exportFormatChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Export Volume Trend</div></div>
+          </div>
+          <canvas id="exportTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /body-wrap -->
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const API_BASE = localStorage.getItem('deemona_api_url') || 'https://deemona-backend.onrender.com';
+const TOKEN    = sessionStorage.getItem('deemona_token') || '';
+
+const HEADERS  = {
+  'Content-Type': 'application/json',
+  ...(TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {})
+};
+
+// ── Chart.js global defaults ──
+Chart.defaults.color         = '#94a3b8';
+Chart.defaults.borderColor   = '#1e3358';
+Chart.defaults.font.family   = "'DM Sans', sans-serif";
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+const GREEN   = '#10b981', BLUE = '#3b82f6', RED   = '#ef4444',
+      AMBER   = '#f59e0b', PURPLE = '#8b5cf6', CYAN = '#06b6d4';
+
+// ═══════════════════════════════════════════════════════════════
+// API FETCH
+// ═══════════════════════════════════════════════════════════════
+async function api(path, opts = {}) {
+  try {
+    const r = await fetch(`${API_BASE}/v1${path}`, { headers: HEADERS, ...opts });
+    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+    return await r.json();
+  } catch (e) {
+    console.warn('[API]', path, e.message);
+    return null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PANEL SWITCHING
+// ═══════════════════════════════════════════════════════════════
+const panelLoaded = {};
+function switchPanel(el, id) {
+  document.querySelectorAll('.sidetab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  if (!panelLoaded[id]) { panelLoaded[id] = true; loadPanel(id); }
+}
+function loadPanel(id) {
+  const map = {
+    overview:     loadOverview,
+    users:        loadUserCharts,
+    sessions:     loadSessionCharts,
+    dashboards:   loadDashboardUsage,
+    activitylog:  () => { loadActionFilters(); loadLogs(); },
+    livefeed:     initLiveFeed,
+    exports:      loadExports
+  };
+  if (map[id]) map[id]();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════════════════════════
+const charts = {};
+function makeChart(id, type, data, opts = {}) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(canvas, {
+    type,
+    data,
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { padding: 14, boxWidth: 10 } } },
+      scales: type === 'bar' || type === 'line' ? {
+        x: { grid: { color: '#1e3358' }, ticks: { maxRotation: 0 } },
+        y: { grid: { color: '#1e3358' }, beginAtZero: true }
+      } : {},
+      ...opts
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════════════════════
+async function loadOverview() {
+  document.getElementById('overviewUpdated').textContent = 'Loading…';
+  const data = await api('/analytics/overview');
+  if (!data) { renderMockOverview(); return; }
+  renderKpis(data);
+  document.getElementById('overviewUpdated').textContent =
+    `Last updated: ${new Date().toLocaleTimeString()}`;
+  document.getElementById('liveStatus').textContent = 'Connected';
+  loadTrendChart(7);
+  loadLoginChart(7);
+  loadRoleChart();
+  loadHourChart();
+}
+
+function renderKpis(d) {
+  const u = d.users || {}, s = d.sessions || {}, l = d.logins || {};
+  const cards = [
+    { label:'Total Users',        value: fmt(u.total||0),       meta:`<span class="up">+${u.new_today||0} today</span>`,       accent:GREEN,   style:'--card-accent:'+GREEN },
+    { label:'Active Users',       value: fmt(u.active||0),      meta:`${pct(u.active,u.total)}% of total`,                     accent:BLUE,    style:'--card-accent:'+BLUE },
+    { label:'Verified Emails',    value: fmt(u.verified||0),    meta:`${pct(u.verified,u.total)}% verified`,                   accent:CYAN,    style:'--card-accent:'+CYAN },
+    { label:'New This Week',      value: fmt(u.new_this_week||0),meta:`<span class="neutral">registrations</span>`,            accent:AMBER,   style:'--card-accent:'+AMBER },
+    { label:'Active Sessions',    value: fmt(s.active_now||0),  meta:`${fmt(s.today||0)} sessions today`,                      accent:PURPLE,  style:'--card-accent:'+PURPLE },
+    { label:'Successful Logins',  value: fmt(l.successful||0),  meta:`${fmt(l.failed||0)} failed today`,                       accent:GREEN,   style:'--card-accent:'+GREEN },
+    { label:'Failed Logins',      value: fmt(l.failed||0),      meta:`<span class="${l.failed>10?'down':'neutral'}">${pct(l.failed,l.total_logins)}% fail rate</span>`, accent:RED, style:'--card-accent:'+RED },
+    { label:'Total Exports',      value: fmt(d.exports?.total||0), meta:'report downloads',                                    accent:BLUE,    style:'--card-accent:'+BLUE },
+  ];
+  document.getElementById('kpiGrid').innerHTML = cards.map(c => `
+    <div class="kpi-card" style="${c.style}">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-meta">${c.meta}</div>
+    </div>`).join('');
+}
+
+function renderMockOverview() {
+  // Fallback mock data when API not available
+  renderKpis({
+    users:   { total:10428, active:9817, verified:9203, new_today:14, new_this_week:97 },
+    sessions:{ active_now:23, today:142, total:48330 },
+    logins:  { successful:138, failed:4, total_logins:142, today:142 },
+    exports: { total:3847 }
+  });
+  document.getElementById('overviewUpdated').textContent = 'Demo mode — mock data';
+  document.getElementById('liveStatus').textContent = 'Demo Mode';
+  loadMockCharts();
+}
+
+function loadMockCharts() {
+  const days = 7, labels = [], reg = [], login_ok = [], login_fail = [];
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    labels.push(d.toLocaleDateString('en',{weekday:'short'}));
+    reg.push(Math.floor(Math.random()*25)+5);
+    login_ok.push(Math.floor(Math.random()*80)+40);
+    login_fail.push(Math.floor(Math.random()*8));
+  }
+  makeChart('regChart','line',{
+    labels,
+    datasets:[{ label:'Registrations', data:reg, borderColor:GREEN,
+      backgroundColor:'rgba(16,185,129,.1)', fill:true, tension:.4, pointRadius:3 }]
+  });
+  makeChart('loginChart','bar',{
+    labels,
+    datasets:[
+      { label:'Successful', data:login_ok,   backgroundColor:'rgba(16,185,129,.7)', borderRadius:4 },
+      { label:'Failed',     data:login_fail, backgroundColor:'rgba(239,68,68,.7)',  borderRadius:4 }
+    ]
+  },{plugins:{legend:{position:'bottom'}}});
+  makeChart('roleChart','doughnut',{
+    labels:['CFO','COO','CEO/Board','HR Manager','Sales','Compliance','Product','IT','ESG','Customer'],
+    datasets:[{ data:[1842,987,423,1203,2341,678,934,245,312,463],
+      backgroundColor:['#10b981','#3b82f6','#8b5cf6','#f59e0b','#06b6d4','#ef4444','#ec4899','#a78bfa','#34d399','#60a5fa'],
+      borderWidth:0 }]
+  });
+  const hours = Array.from({length:24},(_,h)=>({label:`${String(h).padStart(2,'0')}:00`,count:Math.floor(Math.sin(h/24*Math.PI)*80+Math.random()*20)}));
+  makeChart('hourChart','bar',{
+    labels: hours.map(h=>h.label),
+    datasets:[{ label:'Sessions', data:hours.map(h=>h.count),
+      backgroundColor:'rgba(59,130,246,.6)', borderRadius:2 }]
+  },{plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:8}},y:{beginAtZero:true}}});
+}
+
+// ── Trend chart ──────────────────────────────────────────────
+let trendDays = 7;
+async function loadTrendChart(days) {
+  trendDays = days;
+  const rows = await api(`/analytics/users/trend?days=${days}`);
+  if (!rows) return;
+  makeChart('regChart','line',{
+    labels: rows.map(r => new Date(r.date).toLocaleDateString('en',{month:'short',day:'numeric'})),
+    datasets:[{ label:'Registrations', data:rows.map(r=>parseInt(r.registrations)||0),
+      borderColor:GREEN, backgroundColor:'rgba(16,185,129,.1)', fill:true, tension:.4, pointRadius:3 }]
+  });
+}
+function setTrendDays(d, el) {
+  document.querySelectorAll('#panel-overview .charts-grid:first-of-type .chart-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  loadTrendChart(d);
+}
+
+// ── Login chart ──────────────────────────────────────────────
+let loginDays = 7;
+async function loadLoginChart(days) {
+  loginDays = days;
+  const rows = await api(`/analytics/logins/trend?days=${days}`);
+  if (!rows) return;
+  makeChart('loginChart','bar',{
+    labels: rows.map(r => new Date(r.date).toLocaleDateString('en',{month:'short',day:'numeric'})),
+    datasets:[
+      { label:'Successful', data:rows.map(r=>parseInt(r.successful)||0), backgroundColor:'rgba(16,185,129,.7)', borderRadius:4 },
+      { label:'Failed',     data:rows.map(r=>parseInt(r.failed)||0),     backgroundColor:'rgba(239,68,68,.7)',  borderRadius:4 }
+    ]
+  });
+}
+function setLoginDays(d, el) {
+  document.querySelectorAll('#loginChart').forEach(()=>{});
+  el.closest('.chart-controls').querySelectorAll('.chart-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  loadLoginChart(d);
+}
+
+// ── Role chart ───────────────────────────────────────────────
+async function loadRoleChart() {
+  const rows = await api('/analytics/roles/distribution');
+  if (!rows || !rows.length) return;
+  const colors = [GREEN,BLUE,PURPLE,AMBER,RED,CYAN,'#ec4899','#a78bfa','#34d399','#60a5fa'];
+  makeChart('roleChart','doughnut',{
+    labels: rows.map(r=>r.role_name),
+    datasets:[{ data:rows.map(r=>parseInt(r.user_count)||0),
+      backgroundColor:colors.slice(0,rows.length), borderWidth:0 }]
+  });
+}
+
+// ── Hour chart ───────────────────────────────────────────────
+async function loadHourChart() {
+  const rows = await api('/analytics/sessions/hourly');
+  if (!rows) return;
+  makeChart('hourChart','bar',{
+    labels: rows.map(r=>r.label),
+    datasets:[{ label:'Sessions', data:rows.map(r=>parseInt(r.count)||0),
+      backgroundColor:rows.map(r=>parseInt(r.count)>50?'rgba(16,185,129,.8)':'rgba(59,130,246,.5)'),
+      borderRadius:3 }]
+  },{plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:8}},y:{beginAtZero:true}}});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USER CHARTS PANEL
+// ═══════════════════════════════════════════════════════════════
+let userTrendDays = 30;
+async function loadUserCharts() {
+  const [overview, trend] = await Promise.all([
+    api('/analytics/overview'),
+    api(`/analytics/users/trend?days=${userTrendDays}`)
+  ]);
+  if (overview) {
+    const u = overview.users || {};
+    document.getElementById('userKpis').innerHTML = [
+      { label:'Total Users',     value:fmt(u.total||0),          meta:'all time',               style:`--card-accent:${GREEN}` },
+      { label:'Email Verified',  value:fmt(u.verified||0),       meta:`${pct(u.verified,u.total)}%`, style:`--card-accent:${CYAN}` },
+      { label:'Pending Verify',  value:fmt(overview.verifications?.pending_verification||0), meta:'awaiting email', style:`--card-accent:${AMBER}` },
+      { label:'Suspended',       value:fmt(overview.verifications?.suspended||0), meta:'accounts', style:`--card-accent:${RED}` },
+      { label:'New Today',       value:fmt(u.new_today||0),      meta:'registrations',          style:`--card-accent:${BLUE}` },
+      { label:'New This Week',   value:fmt(u.new_this_week||0),  meta:'registrations',          style:`--card-accent:${PURPLE}` },
+    ].map(c=>`<div class="kpi-card" style="${c.style}"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.value}</div><div class="kpi-meta">${c.meta}</div></div>`).join('');
+  }
+  if (trend && trend.length) {
+    makeChart('userTrendChart','line',{
+      labels: trend.map(r => new Date(r.date).toLocaleDateString('en',{month:'short',day:'numeric'})),
+      datasets:[
+        { label:'Registrations', data:trend.map(r=>parseInt(r.registrations)||0),
+          borderColor:GREEN, backgroundColor:'rgba(16,185,129,.08)', fill:true, tension:.4, pointRadius:2 },
+        { label:'Verified',      data:trend.map(r=>parseInt(r.verified)||0),
+          borderColor:CYAN,  backgroundColor:'rgba(6,182,212,.08)',   fill:true, tension:.4, pointRadius:2 }
+      ]
+    });
+  }
+}
+function setUserTrendDays(d, el) {
+  el.closest('.chart-controls').querySelectorAll('.chart-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active'); userTrendDays = d; loadUserCharts();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SESSIONS PANEL
+// ═══════════════════════════════════════════════════════════════
+async function loadSessionCharts() {
+  const [overview, loginTrend] = await Promise.all([
+    api('/analytics/overview'),
+    api('/analytics/logins/trend?days=30')
+  ]);
+  if (overview) {
+    const s = overview.sessions||{}, l = overview.logins||{};
+    document.getElementById('sessionKpis').innerHTML = [
+      { label:'Active Sessions',    value:fmt(s.active_now||0), meta:'right now',              style:`--card-accent:${GREEN}` },
+      { label:'Sessions Today',     value:fmt(s.today||0),      meta:'new sessions',           style:`--card-accent:${BLUE}` },
+      { label:'Total Sessions',     value:fmt(s.total||0),      meta:'all time',               style:`--card-accent:${PURPLE}` },
+      { label:'Successful Logins',  value:fmt(l.successful||0), meta:'+today',                 style:`--card-accent:${GREEN}` },
+      { label:'Failed Attempts',    value:fmt(l.failed||0),     meta:`${pct(l.failed,l.total_logins)}% fail rate`, style:`--card-accent:${RED}` },
+      { label:'Total Auth Events',  value:fmt(l.total_logins||0),meta:'all time',              style:`--card-accent:${CYAN}` },
+    ].map(c=>`<div class="kpi-card" style="${c.style}"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.value}</div><div class="kpi-meta">${c.meta}</div></div>`).join('');
+  }
+  if (loginTrend && loginTrend.length) {
+    makeChart('sessionLoginChart','bar',{
+      labels: loginTrend.map(r => new Date(r.date).toLocaleDateString('en',{month:'short',day:'numeric'})),
+      datasets:[
+        { label:'Successful', data:loginTrend.map(r=>parseInt(r.successful)||0), backgroundColor:'rgba(16,185,129,.75)', borderRadius:4, stack:'s' },
+        { label:'Failed',     data:loginTrend.map(r=>parseInt(r.failed)||0),     backgroundColor:'rgba(239,68,68,.75)',  borderRadius:4, stack:'s' }
+      ]
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD USAGE PANEL
+// ═══════════════════════════════════════════════════════════════
+async function loadDashboardUsage() {
+  const rows = await api('/analytics/dashboards/usage');
+  const data = rows && rows.length ? rows : generateMockDashUsage();
+  const top15 = data.slice(0,15);
+  makeChart('dashUsageChart','bar',{
+    labels: top15.map(r=>r.dashboard_name),
+    datasets:[
+      { label:'Views',        data:top15.map(r=>parseInt(r.view_count)||0),   backgroundColor:'rgba(16,185,129,.7)', borderRadius:4 },
+      { label:'Unique Users', data:top15.map(r=>parseInt(r.unique_users)||0), backgroundColor:'rgba(59,130,246,.7)', borderRadius:4 }
+    ]
+  },{indexAxis:'y',scales:{x:{beginAtZero:true},y:{ticks:{font:{size:11}}}}});
+
+  document.getElementById('dashUsageTable').innerHTML = data.map((r,i)=>`
+    <tr>
+      <td class="td-mono">${i+1}</td>
+      <td><strong>${r.dashboard_name}</strong></td>
+      <td><span class="badge badge-blue">${r.category_name||'—'}</span></td>
+      <td class="td-mono">${fmt(r.view_count||0)}</td>
+      <td class="td-mono">${fmt(r.unique_users||0)}</td>
+      <td class="td-time">${r.last_accessed ? fmtDate(r.last_accessed) : '—'}</td>
+    </tr>`).join('');
+}
+function generateMockDashUsage() {
+  const names = ['P&L Statement','Cash Flow','Balance Sheet','Revenue Forecast','Sales Pipeline',
+    'Budget vs Actual','A/R Aging','Customer Health','Headcount','Expense Report',
+    'Invoice Register','Lead Source','Payroll Summary','Compliance Audit','ESG Carbon'];
+  return names.map((n,i) => ({
+    dashboard_name: n, category_name: ['Finance','Sales','HR','Compliance','ESG'][i%5],
+    view_count: Math.floor(Math.random()*500)+50, unique_users: Math.floor(Math.random()*80)+10,
+    last_accessed: new Date(Date.now() - Math.random()*7*86400000).toISOString()
+  })).sort((a,b)=>b.view_count-a.view_count);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTIVITY LOG
+// ═══════════════════════════════════════════════════════════════
+let logPage = 1, logTotal = 0, logPages = 0, filterTimeout;
+
+async function loadActionFilters() {
+  const rows = await api('/analytics/activity-logs/actions');
+  const sel = document.getElementById('actionFilter');
+  if (rows && rows.length) {
+    rows.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.action; opt.textContent = `${r.action} (${fmt(r.count)})`;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+async function loadLogs(page = 1) {
+  logPage = page;
+  const search = document.getElementById('logSearch').value;
+  const action = document.getElementById('actionFilter').value;
+  const from   = document.getElementById('fromDate').value;
+  const to     = document.getElementById('toDate').value;
+  const params = new URLSearchParams({
+    page, limit: 50, ...(search&&{search}), action,
+    ...(from&&{from_date:from}), ...(to&&{to_date:to})
+  });
+  document.getElementById('logTableBody').innerHTML =
+    `<tr><td colspan="7"><div class="loading"><div class="spinner"></div> Loading…</div></td></tr>`;
+  const data = await api(`/analytics/activity-logs?${params}`);
+  if (!data) { renderMockLogs(); return; }
+  renderLogs(data.logs || [], data.pagination || {});
+}
+
+function renderLogs(logs, pag) {
+  logTotal = pag.total || 0; logPages = pag.pages || 1;
+  document.getElementById('logCount').textContent = fmt(logTotal);
+  document.getElementById('resultCount').textContent = `${fmt(logTotal)} results`;
+  if (!logs.length) {
+    document.getElementById('logTableBody').innerHTML =
+      `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No activity logs found</div><div class="empty-sub">Try adjusting your filters</div></div></td></tr>`;
+    return;
+  }
+  document.getElementById('logTableBody').innerHTML = logs.map(l => `
+    <tr>
+      <td class="td-time">${fmtDate(l.created_at)}</td>
+      <td>
+        <div class="user-cell">
+          <div class="user-avatar" style="background:${avatarColor(l.user_email)};color:#fff">${initials(l.user_name||l.user_email)}</div>
+          <div>
+            <div style="font-size:12px;font-weight:500">${l.user_name||'System'}</div>
+            <div style="font-size:11px;color:var(--text2)">${l.user_email||'—'}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge badge-gray">${l.role_name||'—'}</span></td>
+      <td><span class="badge ${actionBadge(l.action)}">${l.action||'—'}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${l.entity_type||'—'} ${l.entity_id?'#'+l.entity_id:''}</td>
+      <td class="td-mono" style="font-size:11px">${l.ip_address||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${l.tenant_name||'—'}</td>
+    </tr>`).join('');
+  renderPagination(pag);
+}
+
+function renderMockLogs() {
+  const actions = ['login_success','login_failed','dashboard_view','export_csv','user_create',
+    'password_reset','logout','profile_update','admin_access','api_call'];
+  const users   = ['alice@acme.com','bob@globalbank.com','carol@fintech.io','dave@corp.com','admin@deemona.com'];
+  const mock    = Array.from({length:50},(_,i)=>({
+    id: 1000+i, action: actions[Math.floor(Math.random()*actions.length)],
+    user_email: users[Math.floor(Math.random()*users.length)],
+    user_name: ['Alice Chen','Bob Smith','Carol Davis','Dave Kim','Admin'][Math.floor(Math.random()*5)],
+    role_name: ['CFO','COO','Admin','HR Manager','Sales'][Math.floor(Math.random()*5)],
+    entity_type: ['dashboard','user','report','session'][Math.floor(Math.random()*4)],
+    entity_id: Math.floor(Math.random()*100)+1,
+    ip_address: `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+    tenant_name: ['Acme Corp','Global Bank','Fintech IO'][Math.floor(Math.random()*3)],
+    created_at: new Date(Date.now()-Math.random()*86400000*3).toISOString()
+  })).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  document.getElementById('logCount').textContent = '50+';
+  document.getElementById('resultCount').textContent = 'Demo mode';
+  renderLogs(mock, { total:50, pages:1, page:1 });
+}
+
+function renderPagination(pag) {
+  document.getElementById('pagInfo').textContent =
+    `Page ${pag.page} of ${pag.pages} — ${fmt(pag.total)} total entries`;
+  document.getElementById('prevBtn').disabled = !pag.has_prev;
+  document.getElementById('nextBtn').disabled = !pag.has_next;
+  const nums = document.getElementById('pagNums');
+  nums.innerHTML = '';
+  const start = Math.max(1, pag.page-2), end = Math.min(pag.pages, pag.page+2);
+  for (let i = start; i <= end; i++) {
+    const b = document.createElement('button');
+    b.className = 'pag-btn' + (i===pag.page?' active':'');
+    b.textContent = i; b.onclick = () => loadLogs(i);
+    nums.appendChild(b);
+  }
+}
+function prevPage() { if (logPage > 1) loadLogs(logPage - 1); }
+function nextPage() { if (logPage < logPages) loadLogs(logPage + 1); }
+function applyFilters() { loadLogs(1); }
+function debounceFilter() { clearTimeout(filterTimeout); filterTimeout = setTimeout(applyFilters, 400); }
+function clearFilters() {
+  document.getElementById('logSearch').value = '';
+  document.getElementById('actionFilter').value = 'all';
+  document.getElementById('fromDate').value = '';
+  document.getElementById('toDate').value = '';
+  loadLogs(1);
+}
+async function exportLogs() {
+  const search = document.getElementById('logSearch')?.value || '';
+  const action = document.getElementById('actionFilter')?.value || 'all';
+  const from   = document.getElementById('fromDate')?.value || '';
+  const to     = document.getElementById('toDate')?.value || '';
+  const r = await fetch(`${API_BASE}/v1/analytics/activity-logs/export`, {
+    method:'POST', headers:HEADERS,
+    body: JSON.stringify({ search, action, from_date:from, to_date:to })
+  });
+  if (r.ok) {
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `deemona_logs_${Date.now()}.csv`;
+    a.click();
+  } else {
+    alert('Export not available — API connection required');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE FEED
+// ═══════════════════════════════════════════════════════════════
+let feedInterval, feedPaused = false, lastFeedId = 0;
+const feedActions = {};
+
+async function initLiveFeed() {
+  // Load initial KPIs
+  const overview = await api('/analytics/overview');
+  if (overview) {
+    const u = overview.users||{};
+    document.getElementById('liveKpis').innerHTML = [
+      { label:'Active Sessions', value:fmt(overview.sessions?.active_now||0), style:`--card-accent:${GREEN}` },
+      { label:'Events Today',    value:fmt(overview.logins?.today||0),        style:`--card-accent:${BLUE}` },
+      { label:'Active Users',    value:fmt(u.active||0),                      style:`--card-accent:${PURPLE}` },
+      { label:'Fail Rate',       value:pct(overview.logins?.failed,overview.logins?.total_logins)+'%', style:`--card-accent:${RED}` },
+    ].map(c=>`<div class="kpi-card" style="${c.style}"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.value}</div></div>`).join('');
+  }
+  startFeed();
+}
+
+function startFeed() {
+  fetchLive();
+  feedInterval = setInterval(()=>{ if (!feedPaused) fetchLive(); }, 5000);
+}
+
+async function fetchLive() {
+  const rows = await api('/analytics/activity-logs/live');
+  const feed = document.getElementById('liveFeed');
+  if (!rows || !rows.length) {
+    if (feed.innerHTML.includes('spinner')) {
+      feed.innerHTML = '<div style="color:var(--text3);text-align:center;padding:20px">No events yet — waiting for activity…</div>';
+    }
+    return;
+  }
+  // Count actions for chart
+  rows.forEach(r => { feedActions[r.action] = (feedActions[r.action]||0)+1; });
+  updateLiveActionChart();
+
+  // Only add new entries
+  const newRows = rows.filter(r => r.id > lastFeedId);
+  if (!newRows.length) return;
+  lastFeedId = Math.max(...rows.map(r=>r.id));
+
+  if (feed.innerHTML.includes('spinner') || feed.innerHTML.includes('No events')) feed.innerHTML = '';
+  newRows.reverse().forEach(r => {
+    const entry = document.createElement('div');
+    entry.className = 'feed-entry';
+    entry.innerHTML = `
+      <span class="feed-time">${new Date(r.created_at).toLocaleTimeString()}</span>
+      <span class="feed-user">${r.user_email||'system'}</span>
+      <span class="feed-action"><span class="badge ${actionBadge(r.action)}">${r.action}</span></span>`;
+    feed.insertBefore(entry, feed.firstChild);
+  });
+  // Cap at 100 entries
+  while (feed.children.length > 100) feed.removeChild(feed.lastChild);
+}
+
+function updateLiveActionChart() {
+  const sorted = Object.entries(feedActions).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const colors = [GREEN,BLUE,PURPLE,AMBER,RED,CYAN,'#ec4899','#34d399'];
+  makeChart('liveActionChart','bar',{
+    labels: sorted.map(e=>e[0]),
+    datasets:[{ data:sorted.map(e=>e[1]),
+      backgroundColor:colors.slice(0,sorted.length), borderRadius:4 }]
+  },{plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}}},y:{beginAtZero:true}}});
+}
+
+function toggleFeedPause() {
+  feedPaused = !feedPaused;
+  document.getElementById('feedPauseBtn').textContent = feedPaused ? '▶ Resume' : '⏸ Pause';
+}
+function clearFeed() {
+  document.getElementById('liveFeed').innerHTML = '';
+  lastFeedId = 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════════════════════════
+async function loadExports() {
+  const [overview, formats] = await Promise.all([
+    api('/analytics/overview'),
+    api('/analytics/exports/summary')
+  ]);
+  const total = overview?.exports?.total || 0;
+  document.getElementById('exportKpis').innerHTML = [
+    { label:'Total Exports',  value:fmt(total),  meta:'all time',      style:`--card-accent:${GREEN}` },
+    { label:'CSV Exports',    value:fmt(formats?.find(f=>f.format==='csv')?.count||0), meta:'format', style:`--card-accent:${BLUE}` },
+    { label:'JSON Exports',   value:fmt(formats?.find(f=>f.format==='json')?.count||0), meta:'format', style:`--card-accent:${PURPLE}` },
+    { label:'PDF Exports',    value:fmt(formats?.find(f=>f.format==='pdf')?.count||0), meta:'format', style:`--card-accent:${AMBER}` },
+  ].map(c=>`<div class="kpi-card" style="${c.style}"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.value}</div><div class="kpi-meta">${c.meta}</div></div>`).join('');
+
+  const fmts = formats && formats.length ? formats :
+    [{ format:'csv',count:2341 },{ format:'json',count:987 },{ format:'pdf',count:519 }];
+  const colors = [GREEN,BLUE,AMBER,RED,PURPLE];
+  makeChart('exportFormatChart','doughnut',{
+    labels: fmts.map(f=>f.format.toUpperCase()),
+    datasets:[{ data:fmts.map(f=>parseInt(f.count)), backgroundColor:colors, borderWidth:0 }]
+  });
+  // Mock trend
+  const months=['Jan','Feb','Mar','Apr','May','Jun'];
+  makeChart('exportTrendChart','line',{
+    labels:months,
+    datasets:[{ label:'Exports', data:months.map(()=>Math.floor(Math.random()*300)+100),
+      borderColor:GREEN, backgroundColor:'rgba(16,185,129,.1)', fill:true, tension:.4 }]
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function fmt(n) { return Number(n).toLocaleString(); }
+function pct(a,b) { return b>0 ? Math.round((a/b)*100) : 0; }
+function fmtDate(d) {
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en',{month:'short',day:'numeric'}) +
+    ' ' + dt.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+}
+function initials(name) {
+  if (!name) return '?';
+  const p = name.trim().split(/\s+/);
+  return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();
+}
+function avatarColor(email) {
+  const colors = [GREEN,BLUE,PURPLE,AMBER,RED,CYAN,'#ec4899','#f97316'];
+  let h = 0; for (const c of (email||'x')) h = (h*31+c.charCodeAt(0))%colors.length;
+  return colors[Math.abs(h)];
+}
+function actionBadge(action) {
+  if (!action) return 'badge-gray';
+  if (action.includes('login_success')||action.includes('_create')) return 'badge-green';
+  if (action.includes('login_fail')||action.includes('_delete')||action.includes('fail')) return 'badge-red';
+  if (action.includes('export')||action.includes('download')) return 'badge-blue';
+  if (action.includes('admin')||action.includes('reset')) return 'badge-amber';
+  if (action.includes('view')||action.includes('access')) return 'badge-cyan';
+  if (action.includes('update')||action.includes('edit')) return 'badge-purple';
+  return 'badge-gray';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+panelLoaded['overview'] = true;
+loadOverview();
+</script>
+</body>
+</html>
