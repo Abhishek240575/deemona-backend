@@ -6,6 +6,7 @@
 
 const express = require('express');
 const router = express.Router();
+const analytics = require('./analytics');
 
 // Auth and health check are mounted directly in server.js (before auth middleware)
 // All routes below require authentication (middleware applied in server.js)
@@ -15,6 +16,7 @@ router.use('/dashboards', require('./dashboards'));
 router.use('/categories', require('./categories'));
 router.use('/roles', require('./roles'));
 router.use('/notifications', require('./notifications'));
+router.use('/analytics', analytics);
 
 // ── Finance & Accounting ──
 router.use('/gl', require('./finance/gl'));
