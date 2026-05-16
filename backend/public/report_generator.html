@@ -379,7 +379,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   </div>
   <div class="cat-bar" id="catBar"></div>
   <div class="dash-list" id="dashList"></div>
-  <div class="left-foot">
+  <!-- DATA SOURCE PANEL -->
+<div id="dataSourcePanel" style="padding:10px 14px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);flex-shrink:0;display:none">
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text4);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+    <span>📂 Uploaded Data Sources</span>
+    <button class="sm-btn" onclick="loadDataSources()" style="font-size:9px;padding:3px 7px">↻</button>
+  </div>
+  <div id="dataSourceList"></div>
+  <div style="margin-top:8px;font-size:10px;color:var(--teal);display:flex;align-items:center;gap:4px">
+    <span>✅</span><span id="dataSourceStatus">Ready — metrics will use your data</span>
+  </div>
+</div>
+<div id="noDataPanel" style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+  <div style="font-size:11px;color:var(--text4);text-align:center;padding:4px 0">
+    <span>📂 No data uploaded yet</span><br>
+    <span style="font-size:10px">Upload CSV/Excel in dashboard to get real metrics</span>
+  </div>
+</div>
+<div class="left-foot">
     <div class="sel-count" id="selCount"><strong>0</strong> selected</div>
     <button class="btn btn-teal" style="width:100%;justify-content:center" onclick="preview()" id="previewBtn" disabled>
       👁 Preview Report
@@ -398,6 +415,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div>
         <h3>Report Builder</h3>
         <p id="rptMeta" style="font-size:11px;color:var(--text3);margin-top:2px">Configure, preview, then generate</p>
+      <div id="dataModeBadge" style="display:none;margin-top:4px;display:flex;align-items:center;gap:6px">
+        <span id="dataModeTag" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:10px;background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)">📊 Using Your Uploaded Data</span>
+        <span id="dataRowCount" style="font-size:10px;color:var(--text3)"></span>
+        <button onclick="toggleDataMode()" id="dataModeBtn" style="font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer">Switch to Static</button>
+      </div>
       </div>
       <div class="right-actions">
         <button class="btn btn-blue btn-lg" onclick="exportExcel()" id="xlBtn" disabled>📊 Excel</button>
@@ -621,6 +643,267 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 
 <script>
 // ═══════════════════════════════════════════════════════════
+// DEEMONA DYNAMIC DATA ENGINE
+// Reads uploaded customer data from localStorage,
+// auto-detects column types, calculates metrics,
+// and generates rich KPIs for any dashboard
+// ═══════════════════════════════════════════════════════════
+
+const DataEngine = {
+
+  // ── Load all uploaded data sources ──────────────────────
+  sources: {},
+
+  init() {
+    this.sources = {};
+    // Main financial data upload
+    const mainData = localStorage.getItem('deemona_uploaded_data');
+    if (mainData) {
+      try {
+        this.sources.financial = JSON.parse(mainData);
+        console.log('[DataEngine] Financial data:', this.sources.financial.length, 'rows');
+      } catch(e) { console.warn('[DataEngine] Could not parse financial data'); }
+    }
+    // Customer data upload
+    const custData = localStorage.getItem('deemona_customer_data');
+    if (custData) {
+      try {
+        this.sources.customers = JSON.parse(custData);
+        console.log('[DataEngine] Customer data:', this.sources.customers.length, 'rows');
+      } catch(e) { console.warn('[DataEngine] Could not parse customer data'); }
+    }
+    // Any extra sources
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('deemona_data_') && !['deemona_data_config'].includes(key)) {
+        try {
+          const d = JSON.parse(localStorage.getItem(key));
+          if (Array.isArray(d) && d.length > 0) {
+            this.sources[key.replace('deemona_data_','')] = d;
+          }
+        } catch(e) {}
+      }
+    }
+    return Object.keys(this.sources).length > 0;
+  },
+
+  // ── Detect column types ──────────────────────────────────
+  analyzeColumns(data) {
+    if (!data || !data.length) return {};
+    const cols = Object.keys(data[0]);
+    const analysis = {};
+    cols.forEach(col => {
+      const vals = data.map(r => r[col]).filter(v => v !== null && v !== undefined && v !== '');
+      const numericVals = vals.map(v => parseFloat(String(v).replace(/[$,%\s,]/g, ''))).filter(v => !isNaN(v));
+      const dateVals = vals.filter(v => !isNaN(new Date(v).getTime()) && String(v).match(/\d{4}|\d{2}[-\/]\d{2}/));
+      const isNumeric = numericVals.length / vals.length > 0.7;
+      const isDate = dateVals.length / vals.length > 0.5;
+      const isCurrency = vals.some(v => String(v).includes('$'));
+      const isPercent = vals.some(v => String(v).includes('%'));
+      const uniqueRatio = new Set(vals).size / vals.length;
+      const isCategorical = !isNumeric && !isDate && uniqueRatio < 0.3;
+
+      analysis[col] = {
+        type: isDate ? 'date' : isNumeric ? 'numeric' : isCategorical ? 'categorical' : 'text',
+        isCurrency, isPercent,
+        numericVals, dateVals,
+        uniqueCount: new Set(vals).size,
+        totalCount: vals.length,
+        sum: numericVals.reduce((a,b) => a+b, 0),
+        avg: numericVals.length ? numericVals.reduce((a,b) => a+b, 0) / numericVals.length : 0,
+        min: numericVals.length ? Math.min(...numericVals) : 0,
+        max: numericVals.length ? Math.max(...numericVals) : 0,
+        median: numericVals.length ? this.median(numericVals) : 0,
+        stddev: numericVals.length ? this.stddev(numericVals) : 0,
+      };
+    });
+    return analysis;
+  },
+
+  // ── Stats helpers ────────────────────────────────────────
+  median(arr) {
+    const s = [...arr].sort((a,b) => a-b);
+    const m = Math.floor(s.length/2);
+    return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+  },
+  stddev(arr) {
+    const avg = arr.reduce((a,b) => a+b,0)/arr.length;
+    return Math.sqrt(arr.reduce((s,v) => s + Math.pow(v-avg,2),0)/arr.length);
+  },
+
+  // ── Format value nicely ──────────────────────────────────
+  fmt(val, colAnalysis) {
+    if (colAnalysis.isCurrency) {
+      if (Math.abs(val) >= 1e9) return '$' + (val/1e9).toFixed(2) + 'B';
+      if (Math.abs(val) >= 1e6) return '$' + (val/1e6).toFixed(2) + 'M';
+      if (Math.abs(val) >= 1e3) return '$' + (val/1e3).toFixed(1) + 'K';
+      return '$' + val.toFixed(2);
+    }
+    if (colAnalysis.isPercent) return val.toFixed(2) + '%';
+    if (Math.abs(val) >= 1e9) return (val/1e9).toFixed(2) + 'B';
+    if (Math.abs(val) >= 1e6) return (val/1e6).toFixed(2) + 'M';
+    if (Math.abs(val) >= 1e3) return (val/1e3).toFixed(1) + 'K';
+    return Number.isInteger(val) ? val.toLocaleString() : val.toFixed(2);
+  },
+
+  // ── Calculate delta vs prior period ─────────────────────
+  calcDelta(data, colName, analysis) {
+    if (!analysis[colName] || analysis[colName].type !== 'numeric') return '—';
+    // Split into halves and compare
+    const half = Math.floor(data.length / 2);
+    const recentVals = data.slice(0, half).map(r => parseFloat(String(r[colName]).replace(/[$,%\s,]/g,''))).filter(v => !isNaN(v));
+    const priorVals = data.slice(half).map(r => parseFloat(String(r[colName]).replace(/[$,%\s,]/g,''))).filter(v => !isNaN(v));
+    if (!recentVals.length || !priorVals.length) return '—';
+    const recentAvg = recentVals.reduce((a,b)=>a+b,0)/recentVals.length;
+    const priorAvg = priorVals.reduce((a,b)=>a+b,0)/priorVals.length;
+    if (priorAvg === 0) return '—';
+    const pct = ((recentAvg - priorAvg) / Math.abs(priorAvg)) * 100;
+    return (pct >= 0 ? '↑' : '↓') + Math.abs(pct).toFixed(1) + '%';
+  },
+
+  // ── Find best data source for a dashboard category ───────
+  getBestSource(dashboardCat) {
+    const catMap = {
+      'Finance & Accounting': ['financial','finance','accounting','revenue','expense','gl'],
+      'Sales & Marketing': ['financial','sales','marketing','leads','deals','campaign'],
+      'HR & People': ['financial','hr','people','employee','payroll','attendance'],
+      'Customer Success': ['customers','customer','financial'],
+      'Operations & Supply Chain': ['financial','inventory','orders','operations'],
+      'Compliance & Governance': ['financial'],
+      'IT & System Health': ['financial'],
+      'Product & Innovation': ['financial'],
+      'Sustainability & ESG': ['financial','esg'],
+      'Executive & Strategic': ['financial','customers'],
+    };
+    const preferred = catMap[dashboardCat] || ['financial'];
+    for (const key of preferred) {
+      if (this.sources[key] && this.sources[key].length > 0) return { key, data: this.sources[key] };
+    }
+    // Fallback to any available source
+    const keys = Object.keys(this.sources);
+    if (keys.length > 0) return { key: keys[0], data: this.sources[keys[0]] };
+    return null;
+  },
+
+  // ── MAIN: Generate KPIs for a dashboard from real data ───
+  generateKPIs(dashboard, maxKpis = 12) {
+    const source = this.getBestSource(dashboard.cat);
+    if (!source) return null; // No data available
+
+    const { data, key } = source;
+    const analysis = this.analyzeColumns(data);
+    const cols = Object.keys(analysis);
+    const kpis = [];
+
+    // 1. Row count metric
+    kpis.push([`Total ${key.charAt(0).toUpperCase()+key.slice(1)} Records`, data.length.toLocaleString(), '—']);
+
+    // 2. Numeric columns → sum, avg, max metrics
+    const numericCols = cols.filter(c => analysis[c].type === 'numeric' && analysis[c].numericVals.length > 0);
+    numericCols.slice(0, 6).forEach(col => {
+      const a = analysis[col];
+      if (a.sum !== 0) {
+        const delta = this.calcDelta(data, col, analysis);
+        kpis.push([`Total ${col}`, this.fmt(a.sum, a), delta]);
+        if (kpis.length < maxKpis) kpis.push([`Avg ${col}`, this.fmt(a.avg, a), '—']);
+        if (kpis.length < maxKpis && a.max > 0) kpis.push([`Max ${col}`, this.fmt(a.max, a), '—']);
+        if (kpis.length < maxKpis) kpis.push([`Min ${col}`, this.fmt(a.min, a), '—']);
+        if (kpis.length < maxKpis) kpis.push([`Std Dev ${col}`, this.fmt(a.stddev, a), '—']);
+        if (kpis.length < maxKpis) kpis.push([`Median ${col}`, this.fmt(a.median, a), '—']);
+      }
+    });
+
+    // 3. Categorical columns → counts, distribution
+    const catCols = cols.filter(c => analysis[c].type === 'categorical');
+    catCols.slice(0, 3).forEach(col => {
+      const a = analysis[col];
+      if (kpis.length < maxKpis) kpis.push([`Unique ${col}s`, a.uniqueCount.toLocaleString(), '—']);
+      // Top value
+      const freq = {};
+      data.forEach(r => { const v = r[col]; if(v) freq[v] = (freq[v]||0)+1; });
+      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+      if (top && kpis.length < maxKpis) {
+        kpis.push([`Top ${col}`, top[0], `${((top[1]/data.length)*100).toFixed(1)}% share`]);
+      }
+    });
+
+    // 4. Date column → date range, recency
+    const dateCols = cols.filter(c => analysis[c].type === 'date');
+    if (dateCols.length > 0 && kpis.length < maxKpis) {
+      const dateCol = dateCols[0];
+      const dates = data.map(r => new Date(r[dateCol])).filter(d => !isNaN(d.getTime())).sort((a,b)=>b-a);
+      if (dates.length) {
+        const daysSinceLatest = Math.floor((new Date()-dates[0])/(86400000));
+        if (kpis.length < maxKpis) kpis.push([`Latest ${dateCol}`, dates[0].toLocaleDateString(), daysSinceLatest===0?'Today':`${daysSinceLatest} days ago`]);
+        if (kpis.length < maxKpis) kpis.push([`Date Range`, `${dates[dates.length-1].toLocaleDateString()} – ${dates[0].toLocaleDateString()}`, `${dates.length} entries`]);
+      }
+    }
+
+    // 5. Calculated ratios if enough numeric cols
+    if (numericCols.length >= 2 && kpis.length < maxKpis) {
+      const a = analysis[numericCols[0]], b = analysis[numericCols[1]];
+      if (b.sum !== 0) {
+        const ratio = a.sum / b.sum;
+        kpis.push([`${numericCols[0]} / ${numericCols[1]} Ratio`, ratio.toFixed(2) + 'x', '—']);
+      }
+    }
+
+    // 6. Growth rate if date column exists
+    if (dateCols.length > 0 && numericCols.length > 0 && kpis.length < maxKpis) {
+      const dateCol = dateCols[0], numCol = numericCols[0];
+      const sorted = [...data].sort((a,b)=>new Date(a[dateCol])-new Date(b[dateCol]));
+      const q1 = sorted.slice(0, Math.floor(sorted.length/4));
+      const q4 = sorted.slice(-Math.floor(sorted.length/4));
+      const q1Sum = q1.reduce((s,r)=>s+(parseFloat(String(r[numCol]).replace(/[$,%\s,]/g,''))||0),0);
+      const q4Sum = q4.reduce((s,r)=>s+(parseFloat(String(r[numCol]).replace(/[$,%\s,]/g,''))||0),0);
+      if (q1Sum > 0) {
+        const growth = ((q4Sum-q1Sum)/q1Sum)*100;
+        kpis.push([`${numCol} Growth Rate`, growth.toFixed(1)+'%', growth>=0?'↑ Positive':'↓ Negative']);
+      }
+    }
+
+    return { kpis: kpis.slice(0, maxKpis), sourceKey: key, rowCount: data.length };
+  },
+
+  // ── Generate full column stats table ────────────────────
+  generateColumnStats(data) {
+    const analysis = this.analyzeColumns(data);
+    return Object.entries(analysis).map(([col, a]) => ({
+      column: col,
+      type: a.type,
+      count: a.totalCount,
+      unique: a.uniqueCount,
+      sum: a.type==='numeric' ? this.fmt(a.sum, a) : '—',
+      avg: a.type==='numeric' ? this.fmt(a.avg, a) : '—',
+      min: a.type==='numeric' ? this.fmt(a.min, a) : '—',
+      max: a.type==='numeric' ? this.fmt(a.max, a) : '—',
+      stddev: a.type==='numeric' ? this.fmt(a.stddev, a) : '—',
+      median: a.type==='numeric' ? this.fmt(a.median, a) : '—',
+    }));
+  },
+
+  // ── Get data summary for report cover ───────────────────
+  getSummary() {
+    const summary = [];
+    Object.entries(this.sources).forEach(([key, data]) => {
+      if (!data || !data.length) return;
+      const analysis = this.analyzeColumns(data);
+      const numCols = Object.values(analysis).filter(a=>a.type==='numeric').length;
+      const catCols = Object.values(analysis).filter(a=>a.type==='categorical').length;
+      const dateCols = Object.values(analysis).filter(a=>a.type==='date').length;
+      summary.push({
+        source: key.charAt(0).toUpperCase()+key.slice(1),
+        rows: data.length,
+        cols: Object.keys(analysis).length,
+        numericCols: numCols, categoricalCols: catCols, dateCols
+      });
+    });
+    return summary;
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════
 const CAT_C={"Finance & Accounting":"#0d9488","Sales & Marketing":"#6366f1","Operations & Supply Chain":"#f59e0b","HR & People":"#10b981","Compliance & Governance":"#ef4444","Customer Success":"#06b6d4","IT & System Health":"#8b5cf6","Product & Innovation":"#ec4899","Sustainability & ESG":"#84cc16","Executive & Strategic":"#f97316"};
@@ -690,6 +973,7 @@ const DB=[
 // STATE
 // ═══════════════════════════════════════════════════════════
 let selected=new Set(), activeCat='all', searchQ='', previewReady=false;
+let useUploadedData=true, dataEngineReady=false;
 let history=JSON.parse(localStorage.getItem('deem_rpt_history')||'[]');
 let schedules=JSON.parse(localStorage.getItem('deem_rpt_schedules')||'[]');
 
@@ -713,6 +997,8 @@ function switchTab(id){
 // DASHBOARD SELECTOR
 // ═══════════════════════════════════════════════════════════
 function init(){
+  // Load uploaded data sources
+  loadDataSources();
   // Cat filters
   const cats=['all',...Object.keys(CAT_C)];
   document.getElementById('catBar').innerHTML=cats.map(c=>
@@ -766,15 +1052,18 @@ function updCount(){
 function preview(){
   const dashes=DB.filter(d=>selected.has(d.id));
   if(!dashes.length) return;
-  const html=buildReportHTML(dashes,false);
+  // Enrich dashboards with uploaded data if available
+  const enriched = enrichDashboards(dashes);
+  const html=buildReportHTML(enriched,false);
   document.getElementById('emptyState').style.display='none';
   document.getElementById('rptOutput').style.display='block';
   document.getElementById('rptOutput').innerHTML=html;
   previewReady=true;
   ['xlBtn','pdfBtn','prnBtn','schBtn'].forEach(id=>document.getElementById(id).disabled=false);
   const n=dashes.length, period=document.getElementById('cfgPeriod').value;
-  document.getElementById('rptMeta').textContent=`${n} dashboards · ${period} · ${document.getElementById('cfgConf').value}`;
-  showToast('✅',`Preview ready — ${n} dashboard${n!==1?'s':''}`);
+  const dataNote = dataEngineReady && useUploadedData ? ' · 📊 Live Data' : ' · Static KPIs';
+  document.getElementById('rptMeta').textContent=`${n} dashboards · ${period} · ${document.getElementById('cfgConf').value}${dataNote}`;
+  showToast('✅',`Preview ready — ${n} dashboard${n!==1?'s':''}${dataEngineReady&&useUploadedData?' with your data':''}`);
 }
 
 function buildReportHTML(dashes, isComparison, periodA='', periodB=''){
@@ -812,6 +1101,7 @@ function buildReportHTML(dashes, isComparison, periodA='', periodB=''){
       <span class="rpt-chip"><strong>For:</strong> ${forName}</span>
       <span class="rpt-chip"><strong>Dashboards:</strong> ${dashes.length}</span>
       <span class="rpt-chip"><strong>Generated:</strong> ${dateStr}</span>
+      ${dataEngineReady&&useUploadedData?`<span class="rpt-chip" style="background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.3)"><strong>📊 Data:</strong> Live Uploaded</span>`:''}
     </div>
   </div>`;
 
@@ -840,6 +1130,14 @@ function buildReportHTML(dashes, isComparison, periodA='', periodB=''){
         </div>
       </div>`;
 
+    // Show data source badge if using live data
+    if(d._isLive){
+      h+=`<div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+        border-radius:6px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:10px;font-size:11px">
+        <span style="color:#16a34a;font-weight:700">📊 Live Data</span>
+        <span style="color:#64748b">${d._rowCount.toLocaleString()} rows from <strong>${d._dataSource}</strong> dataset</span>
+      </div>`;
+    }
     if(showDesc&&d.desc){
       h+=`<div class="sec-desc" style="border-color:${cc};color:#475569">${d.desc}</div>`;
     }
@@ -892,6 +1190,11 @@ function buildReportHTML(dashes, isComparison, periodA='', periodB=''){
         h+=`<span class="rtag" style="color:${ROLE_C[r]||'#475569'}">${r}</span>`;
       });
       h+=`</div>`;
+    }
+    // Column stats table (only for live data sections)
+    if(d._isLive && useUploadedData && dataEngineReady){
+      const statsHTML = getColumnStatsHTML(d._dataSource);
+      if(statsHTML) h += statsHTML;
     }
     h+=`</div>`;
   });
@@ -1273,6 +1576,108 @@ function showToast(ico,msg){
   const t=document.getElementById('toast');
   t.classList.add('show');
   toastT=setTimeout(()=>t.classList.remove('show'),4500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// DATA ENGINE FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+function loadDataSources(){
+  dataEngineReady = DataEngine.init();
+  const panel = document.getElementById('dataSourcePanel');
+  const noData = document.getElementById('noDataPanel');
+  const badge = document.getElementById('dataModeBadge');
+
+  if(dataEngineReady){
+    panel.style.display='block';
+    noData.style.display='none';
+    if(badge) badge.style.display='flex';
+    const summary = DataEngine.getSummary();
+    let totalRows = 0;
+    document.getElementById('dataSourceList').innerHTML = summary.map(s=>{
+      totalRows += s.rows;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
+        <span style="color:var(--text2);font-weight:500">${s.source}</span>
+        <span style="color:var(--text3);font-family:var(--mono)">${s.rows.toLocaleString()} rows · ${s.cols} cols</span>
+      </div>`;
+    }).join('');
+    if(document.getElementById('dataRowCount'))
+      document.getElementById('dataRowCount').textContent = `${totalRows.toLocaleString()} total rows`;
+    console.log('[DataEngine] Ready with', Object.keys(DataEngine.sources).length, 'sources');
+  } else {
+    panel.style.display='none';
+    noData.style.display='block';
+    if(badge) badge.style.display='none';
+    useUploadedData = false;
+  }
+}
+
+function toggleDataMode(){
+  useUploadedData = !useUploadedData;
+  const btn = document.getElementById('dataModeBtn');
+  const tag = document.getElementById('dataModeTag');
+  if(useUploadedData){
+    btn.textContent='Switch to Static';
+    tag.textContent='📊 Using Your Uploaded Data';
+    tag.style.color='#10b981';
+    tag.style.background='rgba(16,185,129,.15)';
+    tag.style.borderColor='rgba(16,185,129,.3)';
+  } else {
+    btn.textContent='Switch to Live Data';
+    tag.textContent='📋 Using Static KPIs';
+    tag.style.color='#f59e0b';
+    tag.style.background='rgba(245,158,11,.15)';
+    tag.style.borderColor='rgba(245,158,11,.3)';
+  }
+  showToast('🔄', useUploadedData?'Switched to your uploaded data':'Switched to static KPIs');
+}
+
+function enrichDashboards(dashes){
+  if(!dataEngineReady || !useUploadedData) return dashes;
+  return dashes.map(d=>{
+    const result = DataEngine.generateKPIs(d, 15);
+    if(!result || !result.kpis.length) return d;
+    return {
+      ...d,
+      kpis: result.kpis,
+      _dataSource: result.sourceKey,
+      _rowCount: result.rowCount,
+      _isLive: true
+    };
+  });
+}
+
+function getColumnStatsHTML(sourceKey){
+  const data = DataEngine.sources[sourceKey];
+  if(!data) return '';
+  const stats = DataEngine.generateColumnStats(data);
+  let html = `<div style="margin-top:16px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:10px">
+      Column Statistics — ${sourceKey} (${data.length.toLocaleString()} rows)
+    </div>
+    <table class="kpi-tbl" style="font-size:11px">
+      <thead><tr>
+        <th>Column</th><th>Type</th><th>Count</th><th>Unique</th>
+        <th>Sum</th><th>Average</th><th>Min</th><th>Max</th><th>Std Dev</th><th>Median</th>
+      </tr></thead><tbody>`;
+  stats.forEach(s=>{
+    const typeColors={'numeric':'#10b981','categorical':'#6366f1','date':'#f59e0b','text':'#94a3b8'};
+    html+=`<tr>
+      <td style="font-weight:600;color:#1e293b">${s.column}</td>
+      <td><span style="padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;
+        background:${typeColors[s.type]||'#94a3b8'}22;color:${typeColors[s.type]||'#94a3b8'}">${s.type}</span></td>
+      <td class="kv">${s.count.toLocaleString()}</td>
+      <td class="kv">${s.unique.toLocaleString()}</td>
+      <td class="kv">${s.sum}</td>
+      <td class="kv">${s.avg}</td>
+      <td class="kv">${s.min}</td>
+      <td class="kv">${s.max}</td>
+      <td class="kv">${s.stddev}</td>
+      <td class="kv">${s.median}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  return html;
 }
 
 // ═══════════════════════════════════════════════════════════
