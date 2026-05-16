@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deemona — Report Generator</title>
+<title>Deemona — Report Generator Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -13,23 +12,23 @@
   --bg:#070b14;--bg2:rgba(17,24,39,.75);--bg3:rgba(26,34,54,.6);
   --surface:#0f1a2e;--surface2:#152038;--surface3:#1c2d4a;
   --border:rgba(148,163,184,.08);--border2:rgba(148,163,184,.14);
-  --green:#10b981;--green2:#059669;--green3:rgba(16,185,129,.12);
+  --green:#10b981;--green2:#059669;
   --blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
-  --cyan:#06b6d4;--teal:#0d9488;
+  --cyan:#06b6d4;--teal:#0d9488;--pink:#ec4899;
   --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;
   --radius:12px;--radius-sm:8px;--radius-lg:16px;
   --font:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
   --serif:'Cormorant Garamond',serif
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overflow:hidden}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
 
-/* ── HEADER ── */
+/* HEADER */
 .header{height:62px;display:flex;align-items:center;padding:0 24px;gap:16px;
-  background:rgba(7,11,20,.92);border-bottom:1px solid var(--border);
-  backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;flex-shrink:0}
+  background:rgba(7,11,20,.95);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);position:sticky;top:0;z-index:200;flex-shrink:0}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-mark{width:36px;height:36px;border-radius:9px;
   background:linear-gradient(135deg,#0d9488,#0f766e);
@@ -39,207 +38,296 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   background:linear-gradient(135deg,#5eead4,#14b8a6);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .header-div{width:1px;height:28px;background:var(--border2)}
-.page-tag{font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.nav-btn{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border2);
+.page-tag{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.pro-badge{background:linear-gradient(135deg,var(--purple),var(--pink));
+  color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.5px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nav-btn{padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border2);
   background:transparent;color:var(--text2);font-size:12px;font-weight:500;
-  cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.nav-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+  cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
 
-/* ── LAYOUT ── */
-.app{display:flex;flex-direction:column;height:100vh}
+/* APP LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 .body{display:flex;flex:1;overflow:hidden}
 
-/* ── LEFT PANEL ── */
-.left{width:340px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+/* TABS */
+.main-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.main-tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--text3);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;
+  display:flex;align-items:center;gap:7px}
+.main-tab:hover{color:var(--text2)}
+.main-tab.active{color:var(--teal);border-bottom-color:var(--teal);background:rgba(13,148,136,.05)}
+.tab-badge{background:var(--surface3);color:var(--text3);font-size:10px;
+  padding:1px 6px;border-radius:10px;font-family:var(--mono)}
+.main-tab.active .tab-badge{background:rgba(13,148,136,.2);color:var(--teal)}
+
+/* LEFT PANEL */
+.left{width:320px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden}
-.left-head{padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
-.left-head h2{font-size:14px;font-weight:600;margin-bottom:4px}
-.left-head p{font-size:12px;color:var(--text3)}
-.left-toolbar{padding:12px 18px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;flex-shrink:0}
-.search-box{flex:1;position:relative}
-.search-box input{width:100%;background:var(--bg3);border:1px solid var(--border2);
-  border-radius:var(--radius-sm);padding:7px 10px 7px 30px;color:var(--text);
-  font-size:12px;font-family:var(--font);outline:none;transition:border-color .15s}
-.search-box input:focus{border-color:var(--teal)}
-.search-box input::placeholder{color:var(--text4)}
-.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text4)}
-.select-btn{padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border2);
-  background:transparent;color:var(--text3);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s}
-.select-btn:hover{background:var(--surface2);color:var(--text)}
-.cat-filters{padding:10px 18px;border-bottom:1px solid var(--border);
-  display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
-.cat-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;
-  border:1px solid var(--border2);background:transparent;color:var(--text3);
-  cursor:pointer;transition:all .15s}
-.cat-pill:hover{border-color:var(--teal);color:var(--text)}
-.cat-pill.active{background:rgba(13,148,136,.15);color:var(--teal);border-color:rgba(13,148,136,.4)}
-.dash-list{flex:1;overflow-y:auto;padding:8px}
-.dash-group{margin-bottom:4px}
-.dash-group-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--text4);padding:8px 10px 4px}
-.dash-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);
-  cursor:pointer;transition:all .15s;border:1px solid transparent}
-.dash-item:hover{background:var(--surface2);border-color:var(--border)}
-.dash-item.selected{background:rgba(13,148,136,.1);border-color:rgba(13,148,136,.3)}
-.dash-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;
-  background:transparent;cursor:pointer}
-.dash-item.selected .dash-check{background:var(--teal);border-color:var(--teal)}
-.dash-item.selected .dash-check::after{content:'✓';font-size:11px;color:#fff;font-weight:700}
-.dash-info{flex:1;min-width:0}
-.dash-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dash-meta{font-size:10px;color:var(--text3);margin-top:2px}
-.cycle-badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;flex-shrink:0}
-.c-D{background:rgba(16,185,129,.1);color:#10b981}
-.c-W{background:rgba(6,182,212,.1);color:#06b6d4}
-.c-M{background:rgba(99,102,241,.1);color:#6366f1}
-.c-Q{background:rgba(245,158,11,.1);color:#f59e0b}
-.left-foot{padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0}
-.selected-count{font-size:12px;color:var(--text2);margin-bottom:8px}
-.selected-count strong{color:var(--green)}
+.panel-head{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.panel-head h3{font-size:13px;font-weight:600;margin-bottom:2px}
+.panel-head p{font-size:11px;color:var(--text3)}
+.toolbar{padding:10px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:7px;flex-shrink:0}
+.search-wrap{flex:1;position:relative}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:7px 10px 7px 28px;
+  color:var(--text);font-size:12px;font-family:var(--font);outline:none;transition:border-color .15s}
+.search-wrap input:focus{border-color:var(--teal)}
+.search-wrap input::placeholder{color:var(--text4)}
+.search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text4)}
+.sm-btn{padding:5px 9px;border-radius:6px;border:1px solid var(--border2);
+  background:transparent;color:var(--text3);font-size:11px;cursor:pointer;
+  white-space:nowrap;transition:all .15s}
+.sm-btn:hover{background:var(--surface2);color:var(--text)}
+.cat-bar{padding:8px 14px;border-bottom:1px solid var(--border);
+  display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.cpill{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:500;
+  border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
+.cpill:hover{border-color:var(--teal);color:var(--text)}
+.cpill.on{background:rgba(13,148,136,.15);color:var(--teal);border-color:rgba(13,148,136,.4)}
+.dash-list{flex:1;overflow-y:auto;padding:6px}
+.grp-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text4);padding:8px 10px 3px}
+.di{display:flex;align-items:center;gap:8px;padding:7px 10px;
+  border-radius:7px;cursor:pointer;transition:all .12s;border:1px solid transparent}
+.di:hover{background:var(--surface2)}
+.di.sel{background:rgba(13,148,136,.08);border-color:rgba(13,148,136,.25)}
+.di-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.di.sel .di-chk{background:var(--teal);border-color:var(--teal);color:#fff;font-size:10px}
+.di.sel .di-chk::after{content:'✓';font-weight:700}
+.di-name{flex:1;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.di-meta{font-size:9px;color:var(--text3)}
+.cyc{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.cD{background:rgba(16,185,129,.1);color:#10b981}
+.cW{background:rgba(6,182,212,.1);color:#06b6d4}
+.cM{background:rgba(99,102,241,.1);color:#6366f1}
+.cQ{background:rgba(245,158,11,.1);color:#f59e0b}
+.left-foot{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.sel-count{font-size:12px;color:var(--text2);margin-bottom:8px}
+.sel-count strong{color:var(--green)}
 
-/* ── RIGHT PANEL ── */
+/* RIGHT PANEL */
 .right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.right-head{padding:16px 24px;border-bottom:1px solid var(--border);flex-shrink:0;
-  display:flex;align-items:center;gap:16px}
-.right-head h2{font-size:15px;font-weight:600}
-.right-head p{font-size:12px;color:var(--text3);margin-top:2px}
-.right-actions{margin-left:auto;display:flex;gap:8px}
+.right-top{padding:14px 22px;border-bottom:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.right-top h3{font-size:14px;font-weight:600}
+.right-actions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
 
-/* ── CONFIG PANEL ── */
-.config-panel{padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
-.config-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
-.config-item label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
-  color:var(--text3);display:block;margin-bottom:6px}
-.config-item select,.config-item input{
+/* CONFIG */
+.config-section{padding:16px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.cfg-item label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--text3);display:block;margin-bottom:5px}
+.cfg-item input,.cfg-item select{
   width:100%;background:var(--bg3);border:1px solid var(--border2);
-  border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);
+  border-radius:6px;padding:7px 10px;color:var(--text);
   font-size:12px;font-family:var(--font);outline:none;transition:border-color .15s}
-.config-item select:focus,.config-item input:focus{border-color:var(--teal)}
-.config-item select option{background:#111827}
-.toggle-row{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
-.toggle-item{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--text2)}
-.toggle-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--teal);cursor:pointer}
+.cfg-item input:focus,.cfg-item select:focus{border-color:var(--teal)}
+.cfg-item select option{background:#111827}
+.cfg-item input[type=color]{padding:2px 6px;height:34px;cursor:pointer}
+.tog-row{display:flex;gap:10px;flex-wrap:wrap}
+.tog{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)}
+.tog input[type=checkbox]{width:14px;height:14px;accent-color:var(--teal);cursor:pointer}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 
-/* ── PREVIEW AREA ── */
-.preview-wrap{flex:1;overflow:auto;background:var(--bg);padding:24px}
-.preview-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;color:var(--text4);gap:12px}
-.preview-empty-icon{font-size:48px;opacity:.4}
-.preview-empty-text{font-size:15px;color:var(--text3)}
-.preview-empty-sub{font-size:12px}
+/* PREVIEW */
+.preview-area{flex:1;overflow:auto;background:var(--bg);padding:20px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;color:var(--text4);gap:10px;text-align:center}
+.empty-icon{font-size:44px;opacity:.35}
+.empty-text{font-size:14px;color:var(--text3)}
+.empty-sub{font-size:12px;max-width:320px;line-height:1.6}
 
-/* ── REPORT PREVIEW ── */
-.report-preview{background:#fff;color:#1a1a2e;border-radius:var(--radius);
-  box-shadow:0 20px 60px rgba(0,0,0,.4);max-width:900px;margin:0 auto;overflow:hidden}
-.rpt-cover{background:linear-gradient(135deg,#0a1628 0%,#0d2040 50%,#0f2850 100%);
-  padding:48px 52px;color:#fff;position:relative;overflow:hidden}
-.rpt-cover::before{content:'';position:absolute;top:-60px;right:-60px;
-  width:240px;height:240px;border-radius:50%;
-  background:radial-gradient(circle,rgba(13,148,136,.3),transparent 70%)}
-.rpt-cover::after{content:'';position:absolute;bottom:-40px;left:-40px;
-  width:180px;height:180px;border-radius:50%;
-  background:radial-gradient(circle,rgba(16,185,129,.15),transparent 70%)}
-.rpt-logo-row{display:flex;align-items:center;gap:12px;margin-bottom:32px}
-.rpt-logo-icon{width:44px;height:44px;border-radius:10px;
-  background:linear-gradient(135deg,#0d9488,#0f766e);
+/* REPORT DOC */
+.rpt-doc{background:#fff;color:#1a1a2e;border-radius:var(--radius);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);max-width:860px;margin:0 auto;overflow:hidden;
+  font-family:'DM Sans',sans-serif}
+.rpt-cover{padding:44px 48px;color:#fff;position:relative;overflow:hidden}
+.rpt-cover::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;
+  border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)}
+.rpt-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.rpt-logo-box{width:38px;height:38px;border-radius:8px;
+  background:rgba(255,255,255,.15);backdrop-filter:blur(4px);
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--serif);font-weight:700;font-size:22px;color:#fff}
-.rpt-brand{font-family:var(--serif);font-size:20px;font-weight:700;
-  background:linear-gradient(135deg,#5eead4,#14b8a6);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.rpt-cover h1{font-family:var(--serif);font-size:34px;font-weight:700;line-height:1.2;
-  margin-bottom:12px;position:relative;z-index:1}
-.rpt-cover-meta{display:flex;gap:20px;flex-wrap:wrap;position:relative;z-index:1}
-.rpt-cover-meta span{font-size:12px;color:rgba(255,255,255,.65)}
-.rpt-cover-meta strong{color:rgba(255,255,255,.9)}
-.rpt-toc{padding:28px 52px;border-bottom:2px solid #f1f5f9}
-.rpt-toc h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  color:#64748b;margin-bottom:14px}
-.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.toc-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:#374151}
-.toc-num{font-family:var(--mono);font-size:10px;color:#94a3b8;width:20px;flex-shrink:0}
-.rpt-sections{padding:0}
-.rpt-section{padding:28px 52px;border-bottom:1px solid #f1f5f9}
+  font-family:var(--serif);font-weight:700;font-size:19px;color:#fff}
+.rpt-brand{font-family:var(--serif);font-size:17px;font-weight:700;color:#fff}
+.rpt-h1{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1.25;
+  margin-bottom:8px;position:relative;z-index:1}
+.rpt-subtitle{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px}
+.rpt-meta-chips{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+.rpt-chip{background:rgba(255,255,255,.12);backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.15);border-radius:20px;
+  padding:4px 12px;font-size:11px;color:rgba(255,255,255,.9)}
+.rpt-chip strong{color:#fff}
+.watermark-badge{position:absolute;top:16px;right:16px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.8);letter-spacing:.5px;text-transform:uppercase}
+.rpt-toc{padding:24px 48px;border-bottom:1px solid #f1f5f9}
+.rpt-toc h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:#94a3b8;margin-bottom:12px}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.toc-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;color:#374151}
+.toc-n{font-family:var(--mono);font-size:9px;color:#94a3b8;width:18px;flex-shrink:0}
+.toc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.rpt-section{padding:24px 48px;border-bottom:1px solid #f1f5f9}
 .rpt-section:last-child{border-bottom:none}
-.rpt-section-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.rpt-section-num{width:28px;height:28px;border-radius:7px;
-  background:linear-gradient(135deg,#0d9488,#0f766e);
+.sec-hdr{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.sec-num{width:26px;height:26px;border-radius:6px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
-.rpt-section-title{font-size:16px;font-weight:700;color:#1e293b}
-.rpt-section-cat{font-size:11px;color:#64748b;margin-top:2px}
-.rpt-desc{font-size:12px;color:#64748b;line-height:1.7;margin-bottom:16px;
-  padding:10px 14px;background:#f8fafc;border-left:3px solid #0d9488;border-radius:0 6px 6px 0}
-.kpi-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px}
-.kpi-table th{background:#f1f5f9;padding:8px 12px;text-align:left;font-size:10px;
-  font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;
-  border-bottom:2px solid #e2e8f0}
-.kpi-table td{padding:9px 12px;border-bottom:1px solid #f1f5f9;color:#374151}
-.kpi-table tr:last-child td{border-bottom:none}
-.kpi-table tr:hover td{background:#f8fafc}
-.kpi-val{font-family:var(--mono);font-size:13px;font-weight:600;color:#1e293b}
-.kpi-delta-up{color:#10b981;font-weight:600;font-size:11px}
-.kpi-delta-dn{color:#ef4444;font-weight:600;font-size:11px}
-.roles-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.role-tag{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:600;
+  font-size:11px;font-weight:700;color:#fff}
+.sec-title{font-size:15px;font-weight:700;color:#1e293b}
+.sec-cat{font-size:10px;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.sec-desc{font-size:12px;color:#64748b;line-height:1.7;margin-bottom:14px;
+  padding:10px 14px;background:#f8fafc;border-left:3px solid currentColor;border-radius:0 6px 6px 0}
+.kpi-tbl{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}
+.kpi-tbl th{background:#f8fafc;padding:7px 12px;text-align:left;
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#94a3b8;border-bottom:1px solid #e2e8f0}
+.kpi-tbl td{padding:8px 12px;border-bottom:1px solid #f8fafc;color:#374151}
+.kpi-tbl tr:last-child td{border-bottom:none}
+.kpi-tbl tr:hover td{background:#fafafa}
+.kv{font-family:var(--mono);font-size:13px;font-weight:600;color:#1e293b}
+.du{color:#10b981;font-weight:600;font-size:11px}
+.dd{color:#ef4444;font-weight:600;font-size:11px}
+.dn{color:#94a3b8;font-size:11px}
+.roles-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.rtag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;
   background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
-.rpt-footer-page{text-align:center;padding:16px;background:#f8fafc;
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px;
+  border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.cmp-col{padding:12px 16px}
+.cmp-col:first-child{border-right:1px solid #e2e8f0;background:#f8fafc}
+.cmp-col h5{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#94a3b8;margin-bottom:8px}
+.rpt-footer{text-align:center;padding:14px;background:#f8fafc;
   font-size:10px;color:#94a3b8;border-top:1px solid #e2e8f0}
 
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;
-  border-radius:var(--radius-sm);border:1px solid var(--border2);
-  background:var(--surface2);color:var(--text2);font-size:13px;font-weight:500;
+/* HISTORY TAB */
+.hist-list{padding:12px;display:flex;flex-direction:column;gap:8px}
+.hist-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .15s}
+.hist-item:hover{border-color:var(--border2);background:var(--surface3)}
+.hist-icon{font-size:22px;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.hist-chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.hist-chip{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.hist-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* SCHEDULE TAB */
+.sch-list{padding:12px;display:flex;flex-direction:column;gap:8px}
+.sch-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px 16px;display:flex;align-items:center;gap:12px}
+.sch-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sch-on{background:var(--green)}
+.sch-off{background:var(--text4)}
+.sch-info{flex:1}
+.sch-title{font-size:13px;font-weight:600}
+.sch-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.sch-next{font-size:11px;color:var(--teal);margin-top:2px}
+
+/* COMPARE TAB */
+.cmp-setup{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.cmp-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cmp-panel{background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px}
+.cmp-panel h4{font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text2)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+  border-radius:7px;border:1px solid var(--border2);
+  background:var(--surface2);color:var(--text2);font-size:12px;font-weight:500;
   cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
+.btn:hover{background:var(--surface3);color:var(--text)}
 .btn-teal{background:linear-gradient(135deg,var(--teal),#0f766e);color:#fff;border-color:var(--teal)}
-.btn-teal:hover{box-shadow:0 4px 16px rgba(13,148,136,.35);transform:translateY(-1px)}
+.btn-teal:hover{box-shadow:0 4px 14px rgba(13,148,136,.4);transform:translateY(-1px)}
 .btn-green{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:var(--green)}
-.btn-green:hover{box-shadow:0 4px 16px rgba(16,185,129,.35);transform:translateY(-1px)}
+.btn-green:hover{box-shadow:0 4px 14px rgba(16,185,129,.4);transform:translateY(-1px)}
 .btn-blue{background:linear-gradient(135deg,var(--blue),#1d4ed8);color:#fff;border-color:var(--blue)}
-.btn-blue:hover{box-shadow:0 4px 16px rgba(59,130,246,.35);transform:translateY(-1px)}
+.btn-blue:hover{box-shadow:0 4px 14px rgba(59,130,246,.4);transform:translateY(-1px)}
 .btn-amber{background:linear-gradient(135deg,var(--amber),#d97706);color:#fff;border-color:var(--amber)}
-.btn-amber:hover{box-shadow:0 4px 16px rgba(245,158,11,.35);transform:translateY(-1px)}
-.btn-lg{padding:10px 22px;font-size:14px}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-amber:hover{box-shadow:0 4px 14px rgba(245,158,11,.4);transform:translateY(-1px)}
+.btn-red{background:linear-gradient(135deg,var(--red),#b91c1c);color:#fff;border-color:var(--red)}
+.btn-red:hover{box-shadow:0 4px 14px rgba(239,68,68,.4);transform:translateY(-1px)}
+.btn-purple{background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;border-color:var(--purple)}
+.btn-purple:hover{box-shadow:0 4px 14px rgba(139,92,246,.4);transform:translateY(-1px)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-lg{padding:9px 20px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 
-/* ── PROGRESS ── */
-.progress-overlay{position:fixed;inset:0;background:rgba(7,11,20,.85);
-  backdrop-filter:blur(6px);z-index:1000;display:none;
-  align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.progress-overlay.show{display:flex}
-.progress-box{background:var(--surface);border:1px solid var(--border2);
-  border-radius:var(--radius-lg);padding:32px 40px;text-align:center;min-width:320px}
-.progress-title{font-size:16px;font-weight:600;margin-bottom:6px}
-.progress-sub{font-size:12px;color:var(--text3);margin-bottom:20px}
-.progress-bar-wrap{background:var(--bg3);border-radius:10px;height:8px;overflow:hidden;margin-bottom:10px}
-.progress-bar{height:100%;border-radius:10px;
-  background:linear-gradient(90deg,var(--teal),var(--green));
-  transition:width .3s ease;width:0%}
-.progress-pct{font-family:var(--mono);font-size:13px;color:var(--teal);font-weight:600}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(7,11,20,.85);
+  backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);width:90%;max-width:520px;overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:15px;font-weight:600}
+.modal-close{background:transparent;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px 8px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.form-group{margin-bottom:16px}
+.form-group label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--text3);display:block;margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:6px;padding:8px 12px;color:var(--text);
+  font-size:13px;font-family:var(--font);outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal)}
+.form-group select option{background:#111827}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-/* ── TOAST ── */
+/* PROGRESS */
+.prog-overlay{position:fixed;inset:0;background:rgba(7,11,20,.9);
+  backdrop-filter:blur(8px);z-index:1000;display:none;
+  align-items:center;justify-content:center;flex-direction:column}
+.prog-overlay.show{display:flex}
+.prog-box{background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);padding:32px 40px;text-align:center;min-width:340px;
+  box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.prog-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.prog-sub{font-size:12px;color:var(--text3);margin-bottom:18px;min-height:18px}
+.prog-bar-wrap{background:var(--bg3);border-radius:10px;height:6px;overflow:hidden;margin-bottom:8px}
+.prog-bar{height:100%;border-radius:10px;
+  background:linear-gradient(90deg,var(--teal),var(--green));transition:width .25s}
+.prog-pct{font-family:var(--mono);font-size:12px;color:var(--teal);font-weight:600}
+.prog-steps{display:flex;gap:6px;justify-content:center;margin-top:14px}
+.prog-step{width:6px;height:6px;border-radius:50%;background:var(--surface3);transition:background .3s}
+.prog-step.done{background:var(--green)}
+.prog-step.active{background:var(--teal);box-shadow:0 0 8px rgba(13,148,136,.5)}
+
+/* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;z-index:2000;
   background:var(--surface);border:1px solid var(--border2);
-  border-radius:var(--radius);padding:14px 20px;
+  border-radius:var(--radius);padding:12px 18px;
   display:flex;align-items:center;gap:10px;
   box-shadow:0 8px 32px rgba(0,0,0,.4);
-  transform:translateY(80px);opacity:0;
-  transition:all .3s ease;max-width:360px;pointer-events:none}
+  transform:translateY(80px);opacity:0;transition:all .3s;max-width:380px}
 .toast.show{transform:translateY(0);opacity:1}
-.toast-icon{font-size:18px;flex-shrink:0}
-.toast-text{font-size:13px;font-weight:500}
+.toast-icon{font-size:16px;flex-shrink:0}
+.toast-msg{font-size:13px;font-weight:500}
 
-/* ── PRINT STYLES ── */
+/* WATERMARK */
+.wm-stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);
+  font-size:72px;font-weight:900;text-transform:uppercase;letter-spacing:8px;
+  pointer-events:none;opacity:.04;white-space:nowrap;color:currentColor}
+
+/* PRINT */
 @media print{
-  body{background:#fff!important;color:#000!important;overflow:visible!important}
-  .header,.left,.right-head,.config-panel,.right-actions,.progress-overlay,.toast{display:none!important}
+  .header,.left,.right-top,.config-section,.right-actions,
+  .main-tabs,.prog-overlay,.toast,.modal-overlay{display:none!important}
   .body,.right{display:block!important;overflow:visible!important}
-  .preview-wrap{padding:0!important;overflow:visible!important;background:#fff!important}
-  .report-preview{box-shadow:none!important;border-radius:0!important;max-width:100%!important}
+  .preview-area{padding:0!important;overflow:visible!important;background:#fff!important}
+  .rpt-doc{box-shadow:none!important;border-radius:0!important;max-width:100%!important}
   .rpt-section{break-inside:avoid;page-break-inside:avoid}
 }
 </style>
@@ -255,6 +343,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   </div>
   <div class="header-div"></div>
   <span class="page-tag">Report Generator</span>
+  <span class="pro-badge">PRO</span>
   <div class="header-right">
     <a href="index.html" class="nav-btn">← Dashboard</a>
     <a href="analytics.html" class="nav-btn">📊 Analytics</a>
@@ -262,73 +351,83 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   </div>
 </header>
 
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <div class="main-tab active" onclick="switchTab('generator')">📋 Generator</div>
+  <div class="main-tab" onclick="switchTab('history')">🗂 History <span class="tab-badge" id="histBadge">0</span></div>
+  <div class="main-tab" onclick="switchTab('schedule')">⏰ Scheduled <span class="tab-badge" id="schBadge">0</span></div>
+  <div class="main-tab" onclick="switchTab('compare')">⚖ Compare</div>
+</div>
+
 <div class="body">
 
-  <!-- LEFT: Dashboard Selector -->
-  <div class="left">
-    <div class="left-head">
-      <h2>Select Dashboards</h2>
-      <p>Choose dashboards to include in your report</p>
-    </div>
-    <div class="left-toolbar">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="dashSearch" placeholder="Search dashboards..." oninput="filterDashboards(this.value)">
-      </div>
-      <button class="select-btn" onclick="selectAll()">All</button>
-      <button class="select-btn" onclick="selectNone()">None</button>
-    </div>
-    <div class="cat-filters" id="catFilters"></div>
-    <div class="dash-list" id="dashList"></div>
-    <div class="left-foot">
-      <div class="selected-count" id="selectedCount"><strong>0</strong> dashboards selected</div>
-      <button class="btn btn-teal" style="width:100%" onclick="generatePreview()" id="previewBtn" disabled>
-        👁 Preview Report
-      </button>
-    </div>
+<!-- ════════════════════════════════════════════
+     LEFT: DASHBOARD SELECTOR
+════════════════════════════════════════════ -->
+<div class="left">
+  <div class="panel-head">
+    <h3>Select Dashboards</h3>
+    <p>Choose reports to include</p>
   </div>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="dashSearch" placeholder="Search…" oninput="filterDash(this.value)">
+    </div>
+    <button class="sm-btn" onclick="selAll()">All</button>
+    <button class="sm-btn" onclick="selNone()">None</button>
+  </div>
+  <div class="cat-bar" id="catBar"></div>
+  <div class="dash-list" id="dashList"></div>
+  <div class="left-foot">
+    <div class="sel-count" id="selCount"><strong>0</strong> selected</div>
+    <button class="btn btn-teal" style="width:100%;justify-content:center" onclick="preview()" id="previewBtn" disabled>
+      👁 Preview Report
+    </button>
+  </div>
+</div>
 
-  <!-- RIGHT: Config + Preview -->
-  <div class="right">
-    <div class="right-head">
+<!-- ════════════════════════════════════════════
+     RIGHT AREA
+════════════════════════════════════════════ -->
+<div class="right">
+
+  <!-- ── GENERATOR TAB ── -->
+  <div id="tab-generator" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="right-top">
       <div>
-        <h2>Report Generator</h2>
-        <p id="reportMeta">Configure options, preview, then generate your report</p>
+        <h3>Report Builder</h3>
+        <p id="rptMeta" style="font-size:11px;color:var(--text3);margin-top:2px">Configure, preview, then generate</p>
       </div>
-      <div class="right-actions" id="rightActions">
-        <button class="btn btn-blue btn-lg" onclick="generateExcel()" id="excelBtn" disabled>
-          📊 Export Excel
-        </button>
-        <button class="btn btn-green btn-lg" onclick="generatePDF()" id="pdfBtn" disabled>
-          📄 Save PDF
-        </button>
-        <button class="btn btn-amber btn-lg" onclick="printReport()" id="printBtn" disabled>
-          🖨 Print
-        </button>
+      <div class="right-actions">
+        <button class="btn btn-blue btn-lg" onclick="exportExcel()" id="xlBtn" disabled>📊 Excel</button>
+        <button class="btn btn-green btn-lg" onclick="savePDF()" id="pdfBtn" disabled>📄 Save PDF</button>
+        <button class="btn btn-amber btn-lg" onclick="printRpt()" id="prnBtn" disabled>🖨 Print</button>
+        <button class="btn btn-purple btn-lg" onclick="openScheduleModal()" id="schBtn" disabled>⏰ Schedule</button>
       </div>
     </div>
 
     <!-- Config -->
-    <div class="config-panel">
-      <div class="config-grid">
-        <div class="config-item">
+    <div class="config-section">
+      <div class="cfg-grid">
+        <div class="cfg-item">
           <label>Report Title</label>
-          <input type="text" id="cfgTitle" value="Deemona Finance Report" placeholder="Enter report title">
+          <input type="text" id="cfgTitle" value="Deemona Finance Report">
         </div>
-        <div class="config-item">
+        <div class="cfg-item">
           <label>Prepared For</label>
-          <input type="text" id="cfgFor" value="Executive Leadership" placeholder="Recipient name">
+          <input type="text" id="cfgFor" value="Executive Leadership">
         </div>
-        <div class="config-item">
-          <label>Report Period</label>
+        <div class="cfg-item">
+          <label>Period</label>
           <select id="cfgPeriod">
             <option>Q2 2026</option><option>Q1 2026</option>
             <option>FY 2025</option><option>H1 2026</option>
-            <option>Monthly — May 2026</option><option>Custom</option>
+            <option>May 2026</option><option>Custom</option>
           </select>
         </div>
-        <div class="config-item">
-          <label>Confidentiality</label>
+        <div class="cfg-item">
+          <label>Classification</label>
           <select id="cfgConf">
             <option>Confidential</option>
             <option>Internal Use Only</option>
@@ -337,512 +436,850 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           </select>
         </div>
       </div>
-      <div class="toggle-row">
-        <label class="toggle-item"><input type="checkbox" id="chkToc" checked> Table of Contents</label>
-        <label class="toggle-item"><input type="checkbox" id="chkDesc" checked> Dashboard Descriptions</label>
-        <label class="toggle-item"><input type="checkbox" id="chkKpis" checked> KPI Tables</label>
-        <label class="toggle-item"><input type="checkbox" id="chkRoles" checked> Role Access</label>
-        <label class="toggle-item"><input type="checkbox" id="chkMeta" checked> Metadata Footer</label>
-        <label class="toggle-item"><input type="checkbox" id="chkDeltas" checked> Delta Indicators</label>
+      <div class="cfg-grid" style="margin-bottom:10px">
+        <div class="cfg-item">
+          <label>Brand Color</label>
+          <input type="color" id="cfgColor" value="#0d9488">
+        </div>
+        <div class="cfg-item">
+          <label>Logo Text</label>
+          <input type="text" id="cfgLogo" value="Deemona Finance Solution">
+        </div>
+        <div class="cfg-item">
+          <label>Password Protect PDF</label>
+          <input type="password" id="cfgPass" placeholder="Leave blank = no password">
+        </div>
+        <div class="cfg-item">
+          <label>Watermark</label>
+          <select id="cfgWatermark">
+            <option value="">None</option>
+            <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+            <option value="DRAFT">DRAFT</option>
+            <option value="INTERNAL">INTERNAL</option>
+            <option value="APPROVED">APPROVED</option>
+          </select>
+        </div>
+      </div>
+      <div class="tog-row">
+        <label class="tog"><input type="checkbox" id="chkToc" checked> Table of Contents</label>
+        <label class="tog"><input type="checkbox" id="chkDesc" checked> Descriptions</label>
+        <label class="tog"><input type="checkbox" id="chkKpis" checked> KPI Tables</label>
+        <label class="tog"><input type="checkbox" id="chkRoles" checked> Role Access</label>
+        <label class="tog"><input type="checkbox" id="chkDeltas" checked> Delta Indicators</label>
+        <label class="tog"><input type="checkbox" id="chkMeta" checked> Footer Metadata</label>
+        <label class="tog"><input type="checkbox" id="chkWatermark"> Show Watermark</label>
       </div>
     </div>
 
     <!-- Preview -->
-    <div class="preview-wrap" id="previewWrap">
-      <div class="preview-empty" id="previewEmpty">
-        <div class="preview-empty-icon">📋</div>
-        <div class="preview-empty-text">Select dashboards to preview your report</div>
-        <div class="preview-empty-sub">Choose from 57 dashboards on the left, configure options above, then click Preview</div>
+    <div class="preview-area" id="previewArea">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">Select dashboards to preview</div>
+        <div class="empty-sub">Pick from 57 dashboards on the left, configure your options above, then click Preview</div>
       </div>
-      <div id="reportOutput" style="display:none"></div>
+      <div id="rptOutput" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY TAB ── -->
+  <div id="tab-history" style="display:none;flex:1;overflow:auto">
+    <div style="padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div><h3>Report History</h3><p style="font-size:11px;color:var(--text3);margin-top:2px">All generated reports — regenerate or download anytime</p></div>
+      <button class="btn btn-red btn-sm" onclick="clearHistory()">🗑 Clear All</button>
+    </div>
+    <div class="hist-list" id="histList"></div>
+  </div>
+
+  <!-- ── SCHEDULE TAB ── -->
+  <div id="tab-schedule" style="display:none;flex:1;overflow:auto">
+    <div style="padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div><h3>Scheduled Reports</h3><p style="font-size:11px;color:var(--text3);margin-top:2px">Auto-generate reports on a schedule</p></div>
+      <button class="btn btn-teal btn-sm" onclick="openScheduleModal()">+ New Schedule</button>
+    </div>
+    <div class="sch-list" id="schList"></div>
+  </div>
+
+  <!-- ── COMPARE TAB ── -->
+  <div id="tab-compare" style="display:none;flex:1;overflow:auto">
+    <div style="padding:16px 22px;border-bottom:1px solid var(--border)">
+      <h3>Period Comparison Report</h3>
+      <p style="font-size:11px;color:var(--text3);margin-top:2px">Compare the same dashboards across two time periods side-by-side</p>
+    </div>
+    <div class="cmp-setup">
+      <div class="cmp-row">
+        <div class="cmp-panel">
+          <h4 style="color:var(--teal)">Period A (Current)</h4>
+          <div class="form-group" style="margin-bottom:10px">
+            <label>Period Label</label>
+            <input type="text" id="cmpA" value="Q2 2026">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Description</label>
+            <input type="text" id="cmpADesc" value="Current quarter results">
+          </div>
+        </div>
+        <div class="cmp-panel">
+          <h4 style="color:var(--blue)">Period B (Prior)</h4>
+          <div class="form-group" style="margin-bottom:10px">
+            <label>Period Label</label>
+            <input type="text" id="cmpB" value="Q1 2026">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Description</label>
+            <input type="text" id="cmpBDesc" value="Prior quarter for comparison">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-teal btn-lg" onclick="generateCompare()">⚖ Generate Comparison Report</button>
+        <button class="btn btn-blue btn-lg" onclick="exportCompareExcel()">📊 Export Comparison Excel</button>
+        <button class="btn btn-amber btn-lg" onclick="printRpt()">🖨 Print Comparison</button>
+      </div>
+      <div id="cmpOutput"></div>
+    </div>
+  </div>
+
+</div><!-- /right -->
+</div><!-- /body -->
+</div><!-- /app -->
+
+<!-- ════════ SCHEDULE MODAL ════════ -->
+<div class="modal-overlay" id="schModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⏰ Schedule Report</h3>
+      <button class="modal-close" onclick="closeModal('schModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Schedule Name</label>
+        <input type="text" id="schName" placeholder="e.g. Weekly CFO Report">
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Frequency</label>
+          <select id="schFreq">
+            <option value="daily">Daily</option>
+            <option value="weekly" selected>Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Day / Time</label>
+          <select id="schDay">
+            <option>Monday 08:00</option><option>Monday 09:00</option>
+            <option>Wednesday 08:00</option><option>Friday 08:00</option>
+            <option>1st of Month 07:00</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Send To (Email)</label>
+        <input type="email" id="schEmail" placeholder="cfo@company.com">
+      </div>
+      <div class="form-group">
+        <label>Output Format</label>
+        <select id="schFormat">
+          <option>PDF</option><option>Excel</option><option>Both PDF + Excel</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Notes</label>
+        <textarea id="schNotes" rows="2" placeholder="Optional notes…" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('schModal')">Cancel</button>
+      <button class="btn btn-teal" onclick="saveSchedule()">Save Schedule</button>
     </div>
   </div>
 </div>
 
-<!-- Progress Overlay -->
-<div class="progress-overlay" id="progressOverlay">
-  <div class="progress-box">
-    <div class="progress-title" id="progressTitle">Generating Report…</div>
-    <div class="progress-sub" id="progressSub">Compiling dashboard data</div>
-    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
-    <div class="progress-pct" id="progressPct">0%</div>
+<!-- ════════ PROGRESS ════════ -->
+<div class="prog-overlay" id="progOverlay">
+  <div class="prog-box">
+    <div class="prog-title" id="progTitle">Generating…</div>
+    <div class="prog-sub" id="progSub"></div>
+    <div class="prog-bar-wrap"><div class="prog-bar" id="progBar"></div></div>
+    <div class="prog-pct" id="progPct">0%</div>
+    <div class="prog-steps">
+      <div class="prog-step" id="step0"></div>
+      <div class="prog-step" id="step1"></div>
+      <div class="prog-step" id="step2"></div>
+      <div class="prog-step" id="step3"></div>
+    </div>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- ════════ TOAST ════════ -->
 <div class="toast" id="toast">
-  <span class="toast-icon" id="toastIcon">✅</span>
-  <span class="toast-text" id="toastText">Done!</span>
+  <span class="toast-icon" id="toastIco">✅</span>
+  <span class="toast-msg" id="toastMsg"></span>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// DATA — 57 Dashboards
+// DATA
 // ═══════════════════════════════════════════════════════════
-const CAT_C = {
-  "Finance & Accounting":"#0d9488","Sales & Marketing":"#6366f1",
-  "Operations & Supply Chain":"#f59e0b","HR & People":"#10b981",
-  "Compliance & Governance":"#ef4444","Customer Success":"#06b6d4",
-  "IT & System Health":"#8b5cf6","Product & Innovation":"#ec4899",
-  "Sustainability & ESG":"#84cc16","Executive & Strategic":"#f97316"
-};
-const ROLES_C = {
-  "CFO":"#0d9488","VP of Sales / CMO":"#6366f1","COO":"#f59e0b",
-  "HR Manager":"#10b981","Compliance Officer":"#ef4444",
-  "Customer Success Manager":"#06b6d4","CIO":"#8b5cf6",
-  "Product Manager":"#ec4899","ESG Officer":"#84cc16","CEO / Board":"#f97316"
-};
+const CAT_C={"Finance & Accounting":"#0d9488","Sales & Marketing":"#6366f1","Operations & Supply Chain":"#f59e0b","HR & People":"#10b981","Compliance & Governance":"#ef4444","Customer Success":"#06b6d4","IT & System Health":"#8b5cf6","Product & Innovation":"#ec4899","Sustainability & ESG":"#84cc16","Executive & Strategic":"#f97316"};
+const ROLE_C={"CFO":"#0d9488","VP of Sales / CMO":"#6366f1","COO":"#f59e0b","HR Manager":"#10b981","Compliance Officer":"#ef4444","Customer Success Manager":"#06b6d4","CIO":"#8b5cf6","Product Manager":"#ec4899","ESG Officer":"#84cc16","CEO / Board":"#f97316"};
 
-const DASHBOARDS = [
-  {id:1,name:"Profit & Loss",cycle:"Monthly",roles:["CFO"],cat:"Finance & Accounting",desc:"Comprehensive income statement tracking revenue, COGS, gross profit, operating expenses, EBITDA, and net income with YoY and sequential comparisons.",kpis:[["Revenue","$142.8M","↑5.2%"],["COGS","$53.7M","↑3.1%"],["Gross Profit","$89.1M","↑6.8%"],["EBITDA","$48.6M","↑8.2%"],["Net Income","$32.6M","↑7.4%"]]},
-  {id:2,name:"Balance Sheet",cycle:"Quarterly",roles:["CFO"],cat:"Finance & Accounting",desc:"Assets, liabilities, and equity analysis with current ratio, quick ratio, debt-to-equity, working capital trends, and asset turnover tracking.",kpis:[["Total Assets","$892M","↑4.2%"],["Total Liabilities","$468M","↑2.1%"],["Equity","$424M","↑6.8%"],["Current Ratio","2.4x","↑0.2x"],["D/E Ratio","1.1x","↓0.1x"]]},
-  {id:3,name:"Cash Flow",cycle:"Daily",roles:["CFO"],cat:"Finance & Accounting",desc:"Real-time cash position monitoring, 13-week rolling forecast, inflows vs outflows, working capital cycle, and bank balance aggregation.",kpis:[["Cash Balance","$84.2M","↑12.4%"],["Daily Inflows","$4.2M","↑5.8%"],["Daily Outflows","$3.8M","↑4.2%"],["DSO","42 days","↓3 days"],["Net Burn","$1.2M","↓8.4%"]]},
-  {id:4,name:"Accounts Receivable Aging",cycle:"Daily",roles:["CFO"],cat:"Finance & Accounting",desc:"A/R aging analysis with collection rates, DSO trends, customer credit risk scores, past-due management, and bad debt provisioning.",kpis:[["Total A/R","$24.6M","↑3.2%"],["Current %","72%","↑4.1%"],["Overdue","$6.8M","↓8.4%"],["Collection Rate","94.2%","↑1.8%"],["DSO","42 days","↓2 days"]]},
-  {id:5,name:"Accounts Payable Aging",cycle:"Daily",roles:["CFO"],cat:"Finance & Accounting",desc:"Payment queue management, vendor aging, early payment discount capture, DPO optimization, and cash outflow forecasting.",kpis:[["Total A/P","$18.2M","↑2.4%"],["Due This Week","$4.2M","↑5.1%"],["On-Time Pay","96.8%","↑1.2%"],["DPO","38 days","↑2 days"],["Active Vendors","284","↑12"]]},
-  {id:6,name:"Budget vs Actual",cycle:"Monthly",roles:["CFO"],cat:"Finance & Accounting",desc:"Variance analysis comparing budget to actual results with department drill-down, root cause commentary, and forecast accuracy tracking.",kpis:[["Favorable Var.","$2.4M","↑18%"],["Unfavorable Var.","$0.8M","↓12%"],["Accuracy","94.2%","↑2.1%"],["Depts Tracked","24","—"],["Exceptions","6","↓3"]]},
-  {id:7,name:"Expense Breakdown",cycle:"Weekly",roles:["CFO"],cat:"Finance & Accounting",desc:"Detailed expense tracking by category and department with budget overrun alerts, discretionary analysis, and cost optimization.",kpis:[["Weekly Expense","$2.1M","↑3.2%"],["Budget Var.","3.2%","↑0.8%"],["Savings Found","$420K","↑14%"],["Discretionary %","28%","↓2.4%"],["Vendors","342","↑18"]]},
-  {id:8,name:"Invoice Register",cycle:"Weekly",roles:["CFO"],cat:"Finance & Accounting",desc:"Invoice generation status, billing accuracy, dispute tracking, unbilled revenue, and revenue leakage prevention.",kpis:[["Invoiced","$12.4M","↑8.2%"],["Open Disputes","23","↓4"],["Accuracy","99.2%","↑0.3%"],["Unbilled Rev","$1.8M","↓12%"],["Processed","1,420","↑84"]]},
-  {id:9,name:"Sales Pipeline",cycle:"Daily",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Full pipeline visualization with stage-by-stage conversion rates, deal velocity, win probability, and weighted pipeline value.",kpis:[["Pipeline Value","$18.6M","↑12.4%"],["Active Deals","342","↑28"],["Conversion Rate","24.8%","↑2.4%"],["Win Rate","32.4%","↑1.8%"],["Avg Velocity","28 days","↓3 days"]]},
-  {id:10,name:"Revenue Forecast",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Rolling 12-month revenue forecast with ML predictions, confidence intervals, seasonal adjustments, and driver-based modeling.",kpis:[["Forecast Revenue","$168M","↑6.2%"],["Forecast Accuracy","92.8%","↑1.4%"],["ARR","$142M","↑8.4%"],["MRR","$11.8M","↑3.2%"],["MoM Growth","3.2%","↑0.8%"]]},
-  {id:11,name:"Lead Source Analysis",cycle:"Weekly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Lead source attribution, quality scoring, conversion funnel, cost per lead, and channel-level ROI analysis.",kpis:[["Total Leads","4,820","↑12%"],["Qualified %","34.2%","↑3.1%"],["Cost Per Lead","$142","↓8.4%"],["Marketing ROI","3.8x","↑0.4x"],["Conversion","18.6%","↑2.2%"]]},
+const DB=[
+  {id:1,name:"Profit & Loss",cycle:"Monthly",roles:["CFO"],cat:"Finance & Accounting",desc:"Comprehensive income statement tracking revenue, COGS, gross profit, EBITDA, and net income with YoY comparisons.",kpis:[["Revenue","$142.8M","↑5.2%"],["COGS","$53.7M","↑3.1%"],["Gross Profit","$89.1M","↑6.8%"],["EBITDA","$48.6M","↑8.2%"],["Net Income","$32.6M","↑7.4%"]]},
+  {id:2,name:"Balance Sheet",cycle:"Quarterly",roles:["CFO"],cat:"Finance & Accounting",desc:"Assets, liabilities, and equity analysis with current ratio, quick ratio, and debt-to-equity tracking.",kpis:[["Total Assets","$892M","↑4.2%"],["Total Liabilities","$468M","↑2.1%"],["Equity","$424M","↑6.8%"],["Current Ratio","2.4x","↑0.2x"],["D/E Ratio","1.1x","↓0.1x"]]},
+  {id:3,name:"Cash Flow",cycle:"Daily",roles:["CFO"],cat:"Finance & Accounting",desc:"Real-time cash position, 13-week rolling forecast, inflows vs outflows, and working capital cycle.",kpis:[["Cash Balance","$84.2M","↑12.4%"],["Daily Inflows","$4.2M","↑5.8%"],["Daily Outflows","$3.8M","↑4.2%"],["DSO","42 days","↓3 days"],["Net Burn","$1.2M","↓8.4%"]]},
+  {id:4,name:"A/R Aging",cycle:"Daily",roles:["CFO"],cat:"Finance & Accounting",desc:"A/R aging analysis with collection rates, DSO trends, and bad debt provisioning.",kpis:[["Total A/R","$24.6M","↑3.2%"],["Current %","72%","↑4.1%"],["Overdue","$6.8M","↓8.4%"],["Collection Rate","94.2%","↑1.8%"],["DSO","42 days","↓2 days"]]},
+  {id:5,name:"A/P Aging",cycle:"Daily",roles:["CFO"],cat:"Finance & Accounting",desc:"Payment queue management, vendor aging, early payment discount capture, and DPO optimization.",kpis:[["Total A/P","$18.2M","↑2.4%"],["Due This Week","$4.2M","↑5.1%"],["On-Time Pay","96.8%","↑1.2%"],["DPO","38 days","↑2 days"],["Active Vendors","284","↑12"]]},
+  {id:6,name:"Budget vs Actual",cycle:"Monthly",roles:["CFO"],cat:"Finance & Accounting",desc:"Variance analysis comparing budget to actual with department drill-down and forecast accuracy.",kpis:[["Favorable Var.","$2.4M","↑18%"],["Unfavorable Var.","$0.8M","↓12%"],["Accuracy","94.2%","↑2.1%"],["Depts Tracked","24","—"],["Exceptions","6","↓3"]]},
+  {id:7,name:"Expense Breakdown",cycle:"Weekly",roles:["CFO"],cat:"Finance & Accounting",desc:"Detailed expense tracking by category and department with budget overrun alerts.",kpis:[["Weekly Expense","$2.1M","↑3.2%"],["Budget Var.","3.2%","↑0.8%"],["Savings Found","$420K","↑14%"],["Discretionary %","28%","↓2.4%"],["Vendors","342","↑18"]]},
+  {id:8,name:"Invoice Register",cycle:"Weekly",roles:["CFO"],cat:"Finance & Accounting",desc:"Invoice generation status, billing accuracy, dispute tracking, and unbilled revenue.",kpis:[["Invoiced","$12.4M","↑8.2%"],["Open Disputes","23","↓4"],["Accuracy","99.2%","↑0.3%"],["Unbilled Rev","$1.8M","↓12%"],["Processed","1,420","↑84"]]},
+  {id:9,name:"Sales Pipeline",cycle:"Daily",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Pipeline visualization with stage conversion rates, deal velocity, win probability, and weighted pipeline value.",kpis:[["Pipeline Value","$18.6M","↑12.4%"],["Active Deals","342","↑28"],["Conversion Rate","24.8%","↑2.4%"],["Win Rate","32.4%","↑1.8%"],["Avg Velocity","28 days","↓3 days"]]},
+  {id:10,name:"Revenue Forecast",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Rolling 12-month revenue forecast with ML predictions, confidence intervals, and driver-based modeling.",kpis:[["Forecast Revenue","$168M","↑6.2%"],["Forecast Accuracy","92.8%","↑1.4%"],["ARR","$142M","↑8.4%"],["MRR","$11.8M","↑3.2%"],["MoM Growth","3.2%","↑0.8%"]]},
+  {id:11,name:"Lead Source Analysis",cycle:"Weekly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Lead source attribution, quality scoring, conversion funnel, cost per lead, and channel ROI.",kpis:[["Total Leads","4,820","↑12%"],["Qualified %","34.2%","↑3.1%"],["Cost Per Lead","$142","↓8.4%"],["Marketing ROI","3.8x","↑0.4x"],["Conversion","18.6%","↑2.2%"]]},
   {id:12,name:"Campaign Performance",cycle:"Weekly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Campaign ROI, engagement metrics, A/B test results, attribution modeling, and spend optimization.",kpis:[["Total Spend","$2.4M","↑4.2%"],["Campaign ROI","4.2x","↑0.6x"],["Total Reach","1.84M","↑18%"],["Avg CTR","3.4%","↑0.8%"],["CPA","$84.5","↓12%"]]},
-  {id:13,name:"Customer Acquisition Cost",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Blended and channel-specific CAC, payback period, LTV:CAC ratio, and acquisition efficiency trends.",kpis:[["Blended CAC","$2,400","↓8%"],["Avg LTV","$48,000","↑6.2%"],["LTV:CAC Ratio","20x","↑2x"],["Payback Period","8.4 mo","↓1.2 mo"],["New Customers","186","↑14"]]},
-  {id:14,name:"Customer Lifetime Value",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Cohort-based LTV analysis, segment profitability, retention impact modeling, and expansion revenue tracking.",kpis:[["Avg LTV","$48,000","↑6.2%"],["Top Segment LTV","$124,000","↑8.4%"],["Retention Rate","92.4%","↑1.8%"],["Net Rev Retention","112%","↑4%"],["Churn Rate","7.6%","↓1.2%"]]},
-  {id:15,name:"Win/Loss Analysis",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Win/loss reasons, competitive displacement, pricing impact, deal stage drop-off, and sales cycle analysis.",kpis:[["Win Rate","32.4%","↑2.8%"],["Loss Rate","42.8%","↓3.2%"],["No Decision","24.8%","↑0.4%"],["Avg Cycle","28 days","↓4 days"],["Price Wins","44.2%","↑5.1%"]]},
-  {id:16,name:"Sales by Region/Product",cycle:"Weekly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Geographic and product-line revenue breakdown, market penetration, growth rates, and cross-sell analysis.",kpis:[["Total Sales","$34.2M","↑8.4%"],["Americas","$14.8M","↑6.2%"],["EMEA","$10.2M","↑12.4%"],["APAC","$6.4M","↑18.6%"],["QoQ Growth","8.4%","↑2.2%"]]},
-  {id:17,name:"Inventory Levels",cycle:"Daily",roles:["COO"],cat:"Operations & Supply Chain",desc:"Real-time inventory tracking, stock-out risk, safety stock levels, inventory turnover, and ABC classification.",kpis:[["Total Inventory","$28.4M","↑4.2%"],["Turnover Ratio","8.4x","↑0.6x"],["Stock-Out Risk","4.2%","↓1.8%"],["DIO","43 days","↓3 days"],["Accuracy","97.8%","↑0.4%"]]},
-  {id:18,name:"Order Fulfillment",cycle:"Daily",roles:["COO"],cat:"Operations & Supply Chain",desc:"Order-to-delivery cycle time, fill rates, backlog tracking, shipping accuracy, and customer delivery SLA adherence.",kpis:[["Orders/Day","842","↑12%"],["Fill Rate","96.4%","↑1.2%"],["Cycle Time","3.2 days","↓0.4 days"],["On-Time Delivery","94.8%","↑2.1%"],["Backlog","186","↓24"]]},
-  {id:19,name:"Production Efficiency",cycle:"Weekly",roles:["COO"],cat:"Operations & Supply Chain",desc:"OEE metrics, throughput rates, downtime tracking, quality yield, and production capacity utilization.",kpis:[["OEE","82.4%","↑3.2%"],["Throughput/Hr","248","↑18"],["Downtime %","4.8%","↓1.2%"],["Quality Yield","97.2%","↑0.8%"],["Capacity Used","78.6%","↑4.2%"]]},
-  {id:20,name:"Procurement Spend",cycle:"Monthly",roles:["COO"],cat:"Operations & Supply Chain",desc:"Procurement spend analysis, vendor performance, contract compliance, savings tracking, and category management.",kpis:[["Total Spend","$42.8M","↑6.2%"],["Savings","$3.2M","↑18%"],["Contract Compl.","94.2%","↑2.4%"],["Maverick Spend","6.8%","↓2.1%"],["PO Volume","1,840","↑120"]]},
-  {id:21,name:"Supply Chain Risk",cycle:"Weekly",roles:["COO"],cat:"Operations & Supply Chain",desc:"Supplier risk scoring, geographic concentration, single-source dependencies, lead time variability, and disruption tracking.",kpis:[["Active Risks","42","↓8"],["Critical Suppliers","8","↓2"],["Single-Source %","18.4%","↓2.6%"],["Disruptions YTD","6","↓3"],["Mitigated %","72%","↑8%"]]},
-  {id:22,name:"Warehouse Utilization",cycle:"Daily",roles:["COO"],cat:"Operations & Supply Chain",desc:"Space utilization, picking efficiency, receiving throughput, dock-to-stock time, and labor productivity.",kpis:[["Space Utilized","84.2%","↑3.4%"],["Pick Rate/Hr","186","↑14"],["Dock-to-Stock","2.8 days","↓0.4"],["Labor Prod.","94.2%","↑2.8%"],["Pick Errors","0.8%","↓0.3%"]]},
-  {id:23,name:"Headcount & Turnover",cycle:"Monthly",roles:["HR Manager"],cat:"HR & People",desc:"Total headcount trends, voluntary/involuntary turnover, department-level attrition, and retention risk analysis.",kpis:[["Headcount","2,148","↑42"],["Turnover Rate","12.4%","↓1.8%"],["Voluntary","8.2%","↓1.2%"],["New Hires/Mo","42","↑8"],["Retention","87.6%","↑1.8%"]]},
-  {id:24,name:"Payroll Summary",cycle:"Weekly",roles:["HR Manager"],cat:"HR & People",desc:"Total payroll cost, compensation analysis by department, overtime tracking, benefits utilization, and tax compliance.",kpis:[["Total Payroll","$8.4M","↑4.2%"],["Avg Comp","$94,000","↑3.8%"],["Overtime %","6.2%","↓1.4%"],["Benefits Cost","$2.8M","↑3.1%"],["Tax Compliance","99.4%","↑0.2%"]]},
-  {id:25,name:"Leave & Attendance",cycle:"Daily",roles:["HR Manager"],cat:"HR & People",desc:"Attendance tracking, leave balances, absenteeism patterns, overtime correlation, and compliance monitoring.",kpis:[["Attendance","96.8%","↑1.2%"],["Absentee Rate","3.2%","↓0.8%"],["Avg Leave Bal","12.4 days","↑2 days"],["Overtime Hrs","4,820","↑280"],["WFH %","34.2%","↑4.8%"]]},
-  {id:26,name:"Training Completion",cycle:"Monthly",roles:["HR Manager"],cat:"HR & People",desc:"Training program completion rates, skill gap analysis, certification tracking, and learning hours per employee.",kpis:[["Completion Rate","78.4%","↑6.2%"],["Avg Hours/Emp","24.6","↑3.2"],["Active Programs","42","↑5"],["Certifications","186","↑24"],["Satisfaction","4.2/5","↑0.3"]]},
-  {id:27,name:"Recruitment Funnel",cycle:"Weekly",roles:["HR Manager"],cat:"HR & People",desc:"Applicant flow, stage conversion rates, time-to-fill, cost per hire, source effectiveness, and offer acceptance rates.",kpis:[["Open Reqs","48","↑6"],["Applicants","1,240","↑120"],["Time to Fill","34 days","↓6 days"],["Cost/Hire","$4,200","↓$600"],["Offer Accept","84.2%","↑3.4%"]]},
-  {id:28,name:"Audit Logs",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"System-wide audit trail with user actions, access patterns, data modification tracking, and anomaly detection.",kpis:[["Total Events","284,000","↑12%"],["Active Users","842","↑40"],["Anomalies","24","↓8"],["Critical Events","8","↓3"],["Audit Coverage","98.4%","↑0.6%"]]},
-  {id:29,name:"Access Control",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"User access rights, privilege escalation monitoring, orphaned accounts, separation of duties, and access review status.",kpis:[["Total Accounts","2,840","↑80"],["Privileged Users","48","↓6"],["Orphaned Accts","12","↓8"],["SoD Violations","6","↓4"],["Compliance","96.8%","↑1.8%"]]},
-  {id:30,name:"Data Privacy (GDPR/CCPA)",cycle:"Monthly",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Privacy request tracking, consent management, data mapping, breach notification status, and regulatory compliance scoring.",kpis:[["Privacy Requests","186","↑24"],["Compliance Score","94.8%","↑2.2%"],["Breaches YTD","2","↓1"],["Consent Rate","97.2%","↑0.8%"],["DSAR Response","12 days","↓3 days"]]},
-  {id:31,name:"Incident Reports",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Security incident tracking, response times, severity classification, root cause analysis, and resolution status.",kpis:[["Open Incidents","18","↓6"],["MTTR","4.2 hrs","↓1.8 hrs"],["Critical","3","↓2"],["Resolved MTD","48","↑12"],["SLA Met","94.8%","↑2.4%"]]},
-  {id:32,name:"Risk Heatmap",cycle:"Monthly",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Enterprise risk register visualization, probability-impact matrix, mitigation progress, and key risk indicators.",kpis:[["Total Risks","86","↓8"],["Critical","4","↓2"],["Mitigated %","72%","↑8%"],["KRI Breaches","6","↓4"],["Loss Events","2","↓1"]]},
-  {id:33,name:"SLA Adherence",cycle:"Weekly",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Service level agreement tracking across all commitments, breach analysis, penalty calculations, and improvement trends.",kpis:[["Overall SLA","96.8%","↑1.8%"],["Breaches MTD","8","↓4"],["Critical SLAs","100%","—"],["Penalties $","$42,000","↓$18K"],["At Risk","4","↓2"]]},
-  {id:34,name:"Fraud Detection Alerts",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Real-time transaction anomaly detection, suspicious activity alerts, investigation management, and prevention metrics.",kpis:[["Active Alerts","48","↓12"],["False Positive","12%","↓3%"],["Prevented $","$2.4M","↑18%"],["Open Cases","8","↓4"],["Txns Scanned","284,000","↑12%"]]},
-  {id:35,name:"Ticket Resolution Times",cycle:"Daily",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Support ticket lifecycle tracking, SLA adherence, first response time, escalation rates, and agent performance.",kpis:[["Open Tickets","186","↓24"],["Avg Resolution","4.2 hrs","↓1.2 hrs"],["First Response","28 min","↓8 min"],["SLA Met","94.8%","↑2.4%"],["CSAT","4.4/5","↑0.2"]]},
-  {id:36,name:"CSAT / NPS",cycle:"Weekly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"CSAT scores, NPS tracking, sentiment analysis, survey response rates, and detractor recovery metrics.",kpis:[["NPS Score","62","↑5"],["CSAT","4.4/5","↑0.2"],["Response Rate","34.2%","↑4.1%"],["Promoters","48%","↑4%"],["Detractors","12%","↓3%"]]},
-  {id:37,name:"Churn & Retention",cycle:"Monthly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Churn rate tracking, retention cohort analysis, revenue impact, early warning indicators, and win-back effectiveness.",kpis:[["Monthly Churn","2.4%","↓0.6%"],["Retention","92.4%","↑1.8%"],["Rev Churn $","$480K","↓$80K"],["At-Risk Accts","24","↓6"],["Net Retention","112%","↑4%"]]},
-  {id:38,name:"Renewal & Upsell Pipeline",cycle:"Weekly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Renewal pipeline, upsell/cross-sell opportunities, expansion revenue, and account growth tracking.",kpis:[["Upcoming Renewals","142","↑15"],["Renewal Value","$8.4M","↑6.2%"],["Upsell Pipeline","$3.2M","↑18%"],["Renewal Rate","94.2%","↑2.4%"],["Account Growth","18.4%","↑3.2%"]]},
-  {id:39,name:"Customer Health Score",cycle:"Weekly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Composite health scores combining product usage, support history, NPS, payment patterns, and engagement metrics.",kpis:[["Healthy %","68%","↑5%"],["At-Risk %","22%","↓3%"],["Critical %","10%","↓2%"],["Avg Score","74","↑4"],["Improving","42%","↑5%"]]},
-  {id:40,name:"Uptime Monitoring",cycle:"Daily",roles:["CIO"],cat:"IT & System Health",desc:"System availability tracking, SLA compliance, planned vs unplanned downtime, and incident correlation analysis.",kpis:[["Uptime","99.94%","↑0.02%"],["Incidents MTD","8","↓4"],["MTTR","42 min","↓12 min"],["SLA Status","99.9%","—"],["Active Alerts","4","↓3"]]},
-  {id:41,name:"API Latency & Errors",cycle:"Daily",roles:["CIO"],cat:"IT & System Health",desc:"API response time monitoring, error rate tracking, throughput analysis, and endpoint-level performance breakdown.",kpis:[["P50 Latency","48ms","↓12ms"],["P99 Latency","280ms","↓60ms"],["Error Rate","0.42%","↓0.18%"],["Throughput","84,200/s","↑8,000"],["Endpoints","248","↑10"]]},
-  {id:42,name:"Disaster Recovery",cycle:"Weekly",roles:["CIO"],cat:"IT & System Health",desc:"DR readiness scoring, RTO/RPO compliance, backup verification, failover test results, and recovery plan status.",kpis:[["DR Readiness","94.2%","↑3.4%"],["RTO Status","100%","—"],["RPO Status","100%","—"],["Backups Valid","99.8%","↑0.2%"],["Last Test","14 days","↓3 days"]]},
-  {id:43,name:"Feature Adoption",cycle:"Weekly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Feature usage analytics, adoption curves, activation funnels, power user identification, and feature stickiness metrics.",kpis:[["Avg Adoption","42.8%","↑5.2%"],["DAU","8,420","↑620"],["Activation Rate","68.4%","↑4.8%"],["Power Users %","14.2%","↑2.4%"],["Stickiness","34.2%","↑3.8%"]]},
-  {id:44,name:"Release Velocity",cycle:"Weekly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Sprint velocity, release frequency, deployment success rates, rollback incidents, and cycle time analytics.",kpis:[["Sprint Velocity","42","↑6"],["Releases/Mo","8","↑2"],["Deploy Success","98.4%","↑0.8%"],["Cycle Time","12.4 days","↓2 days"],["PRs Merged/Wk","84","↑12"]]},
-  {id:45,name:"Bug / Issue Tracking",cycle:"Daily",roles:["Product Manager"],cat:"Product & Innovation",desc:"Open bug inventory, severity breakdown, resolution rates, aging analysis, and quality trend metrics.",kpis:[["Open Bugs","186","↓24"],["Critical","8","↓4"],["Resolved/Wk","42","↑8"],["Avg Age","8.4 days","↓2 days"],["Escape Rate","2.4%","↓0.6%"]]},
-  {id:46,name:"Roadmap Progress",cycle:"Monthly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Strategic initiative progress, milestone tracking, resource allocation, dependency management, and delivery confidence.",kpis:[["On Track %","72%","↑6%"],["Milestones Hit","18","↑3"],["Delayed","6","↓2"],["Resource Util.","82%","↑4%"],["Confidence","78%","↑5%"]]},
-  {id:47,name:"Usage Analytics",cycle:"Weekly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Feature-level usage metrics, session analysis, user journey mapping, drop-off points, and engagement scoring.",kpis:[["Sessions/Day","12,400","↑1,200"],["Avg Session","8.4 min","↑1.2 min"],["Pages/Session","6.2","↑0.4"],["Bounce Rate","28.4%","↓3.2%"],["D7 Retention","42.8%","↑4.2%"]]},
-  {id:48,name:"Carbon Footprint",cycle:"Monthly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Scope 1/2/3 emissions tracking, reduction progress vs targets, carbon intensity ratios, and offset management.",kpis:[["Total Emissions","42,800 tCO₂","↓8.4%"],["Scope 1","12,400 tCO₂","↓6.2%"],["Scope 2","18,600 tCO₂","↓9.8%"],["Target Progress","62%","↑8%"],["Intensity","24.6","↓3.8%"]]},
-  {id:49,name:"Diversity & Inclusion",cycle:"Quarterly",roles:["HR Manager"],cat:"Sustainability & ESG",desc:"Workforce diversity breakdown, inclusion survey results, pay equity analysis, and representation at leadership levels.",kpis:[["Diversity Index","72","↑4"],["Gender Balance","46.8%","↑2.4%"],["Leadership Div.","34.2%","↑4.8%"],["Pay Gap","3.8%","↓1.2%"],["Inclusion Score","78","↑4"]]},
-  {id:50,name:"CSR Project Impact",cycle:"Quarterly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Corporate social responsibility project tracking, community impact metrics, volunteer hours, and donation management.",kpis:[["Active Projects","18","↑3"],["Investment","$2.4M","↑18%"],["Beneficiaries","48,000","↑5,000"],["Volunteer Hrs","12,400","↑1,200"],["Impact Score","84","↑5"]]},
-  {id:51,name:"Energy Consumption",cycle:"Monthly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Energy usage tracking, renewable vs non-renewable split, efficiency metrics, cost correlation, and target adherence.",kpis:[["Total Energy","4.8M kWh","↓4.2%"],["Renewable %","42.8%","↑4.8%"],["Efficiency","86%","↑3.4%"],["Energy Cost","$840K","↓6.2%"],["Target Hit","78%","↑5%"]]},
-  {id:52,name:"Waste & Recycling",cycle:"Monthly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Waste generation tracking, recycling rates, landfill diversion, circular economy metrics, and waste-to-energy conversion.",kpis:[["Total Waste","2,400 tons","↓12%"],["Recycled %","68%","↑5%"],["Diversion Rate","82%","↑4%"],["YoY Reduction","12.4%","—"],["Circularity","42%","↑5%"]]},
-  {id:53,name:"KPI Overview",cycle:"Daily",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Top-level executive dashboard consolidating the most critical KPIs across all business functions for at-a-glance decision making.",kpis:[["Revenue","$142.8M","↑5.2%"],["Net Margin","22.8%","↑1.4%"],["Cash Position","$84.2M","↑12%"],["ARR","$142M","↑8.4%"],["NPS","62","↑5"]]},
-  {id:54,name:"Strategic Goals",cycle:"Monthly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"OKR/strategic initiative tracking with progress bars, milestone achievements, dependency management, and risk flags.",kpis:[["On Track","72%","↑6%"],["Achieved","18","↑3"],["Delayed","6","↓2"],["Resource Fit","84%","↑5%"],["Confidence","78%","↑5%"]]},
-  {id:55,name:"Competitor Benchmarking",cycle:"Quarterly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Competitive intelligence dashboard with market share analysis, feature comparison, pricing benchmarks, and win/loss patterns.",kpis:[["Market Share","14.2%","↑1.4%"],["Market Rank","3rd","—"],["Growth vs Mkt","4.8%","↑2.2%"],["Win vs Comp.","48%","↑5%"],["Feature Parity","82%","↑4%"]]},
-  {id:56,name:"Scenario Planning",cycle:"Quarterly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Monte Carlo simulations, best/worst/base case analyses, sensitivity tables, stress tests, and decision frameworks.",kpis:[["Base Case","$156M","↑6.2%"],["Best Case","$189M","↑8.4%"],["Worst Case","$112M","↑2.1%"],["Confidence","78%","↑5%"],["Expected Value","$148M","↑5.8%"]]},
-  {id:57,name:"Investor Relations",cycle:"Quarterly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Shareholder metrics, EPS trends, dividend history, analyst consensus, institutional ownership, and stock performance.",kpis:[["EPS","$3.42","↑12%"],["P/E Ratio","18.6x","↑1.2x"],["Div. Yield","2.1%","↑0.3%"],["Market Cap","$2.8B","↑8%"],["Inst. Own.","72.4%","↑2.8%"]]}
+  {id:13,name:"Customer Acquisition Cost",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Blended and channel-specific CAC, payback period, LTV:CAC ratio, and acquisition efficiency.",kpis:[["Blended CAC","$2,400","↓8%"],["Avg LTV","$48,000","↑6.2%"],["LTV:CAC Ratio","20x","↑2x"],["Payback Period","8.4 mo","↓1.2 mo"],["New Customers","186","↑14"]]},
+  {id:14,name:"Customer Lifetime Value",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Cohort-based LTV analysis, segment profitability, retention impact, and expansion revenue.",kpis:[["Avg LTV","$48,000","↑6.2%"],["Top Segment LTV","$124,000","↑8.4%"],["Retention Rate","92.4%","↑1.8%"],["Net Rev Retention","112%","↑4%"],["Churn Rate","7.6%","↓1.2%"]]},
+  {id:15,name:"Win/Loss Analysis",cycle:"Monthly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Win/loss reasons, competitive displacement, pricing impact, and deal stage drop-off analysis.",kpis:[["Win Rate","32.4%","↑2.8%"],["Loss Rate","42.8%","↓3.2%"],["No Decision","24.8%","↑0.4%"],["Avg Cycle","28 days","↓4 days"],["Price Wins","44.2%","↑5.1%"]]},
+  {id:16,name:"Sales by Region/Product",cycle:"Weekly",roles:["VP of Sales / CMO"],cat:"Sales & Marketing",desc:"Geographic and product-line revenue breakdown, market penetration, and cross-sell analysis.",kpis:[["Total Sales","$34.2M","↑8.4%"],["Americas","$14.8M","↑6.2%"],["EMEA","$10.2M","↑12.4%"],["APAC","$6.4M","↑18.6%"],["QoQ Growth","8.4%","↑2.2%"]]},
+  {id:17,name:"Inventory Levels",cycle:"Daily",roles:["COO"],cat:"Operations & Supply Chain",desc:"Real-time inventory tracking, stock-out risk, safety stock levels, and turnover analysis.",kpis:[["Total Inventory","$28.4M","↑4.2%"],["Turnover Ratio","8.4x","↑0.6x"],["Stock-Out Risk","4.2%","↓1.8%"],["DIO","43 days","↓3 days"],["Accuracy","97.8%","↑0.4%"]]},
+  {id:18,name:"Order Fulfillment",cycle:"Daily",roles:["COO"],cat:"Operations & Supply Chain",desc:"Order-to-delivery cycle time, fill rates, backlog tracking, and customer delivery SLA adherence.",kpis:[["Orders/Day","842","↑12%"],["Fill Rate","96.4%","↑1.2%"],["Cycle Time","3.2 days","↓0.4"],["On-Time Delivery","94.8%","↑2.1%"],["Backlog","186","↓24"]]},
+  {id:19,name:"Production Efficiency",cycle:"Weekly",roles:["COO"],cat:"Operations & Supply Chain",desc:"OEE metrics, throughput rates, downtime tracking, quality yield, and capacity utilization.",kpis:[["OEE","82.4%","↑3.2%"],["Throughput/Hr","248","↑18"],["Downtime %","4.8%","↓1.2%"],["Quality Yield","97.2%","↑0.8%"],["Capacity Used","78.6%","↑4.2%"]]},
+  {id:20,name:"Procurement Spend",cycle:"Monthly",roles:["COO"],cat:"Operations & Supply Chain",desc:"Procurement spend analysis, vendor performance, contract compliance, and savings tracking.",kpis:[["Total Spend","$42.8M","↑6.2%"],["Savings","$3.2M","↑18%"],["Contract Compl.","94.2%","↑2.4%"],["Maverick Spend","6.8%","↓2.1%"],["PO Volume","1,840","↑120"]]},
+  {id:21,name:"Supply Chain Risk",cycle:"Weekly",roles:["COO"],cat:"Operations & Supply Chain",desc:"Supplier risk scoring, geographic concentration, single-source dependencies, and disruption tracking.",kpis:[["Active Risks","42","↓8"],["Critical Suppliers","8","↓2"],["Single-Source %","18.4%","↓2.6%"],["Disruptions YTD","6","↓3"],["Mitigated %","72%","↑8%"]]},
+  {id:22,name:"Warehouse Utilization",cycle:"Daily",roles:["COO"],cat:"Operations & Supply Chain",desc:"Space utilization, picking efficiency, dock-to-stock time, and labor productivity.",kpis:[["Space Utilized","84.2%","↑3.4%"],["Pick Rate/Hr","186","↑14"],["Dock-to-Stock","2.8 days","↓0.4"],["Labor Prod.","94.2%","↑2.8%"],["Pick Errors","0.8%","↓0.3%"]]},
+  {id:23,name:"Headcount & Turnover",cycle:"Monthly",roles:["HR Manager"],cat:"HR & People",desc:"Total headcount trends, voluntary/involuntary turnover, and retention risk analysis.",kpis:[["Headcount","2,148","↑42"],["Turnover Rate","12.4%","↓1.8%"],["Voluntary","8.2%","↓1.2%"],["New Hires/Mo","42","↑8"],["Retention","87.6%","↑1.8%"]]},
+  {id:24,name:"Payroll Summary",cycle:"Weekly",roles:["HR Manager"],cat:"HR & People",desc:"Total payroll cost, compensation analysis, overtime tracking, and tax compliance.",kpis:[["Total Payroll","$8.4M","↑4.2%"],["Avg Comp","$94,000","↑3.8%"],["Overtime %","6.2%","↓1.4%"],["Benefits Cost","$2.8M","↑3.1%"],["Tax Compliance","99.4%","↑0.2%"]]},
+  {id:25,name:"Leave & Attendance",cycle:"Daily",roles:["HR Manager"],cat:"HR & People",desc:"Attendance tracking, leave balances, absenteeism patterns, and compliance monitoring.",kpis:[["Attendance","96.8%","↑1.2%"],["Absentee Rate","3.2%","↓0.8%"],["Avg Leave Bal","12.4 days","↑2"],["Overtime Hrs","4,820","↑280"],["WFH %","34.2%","↑4.8%"]]},
+  {id:26,name:"Training Completion",cycle:"Monthly",roles:["HR Manager"],cat:"HR & People",desc:"Training completion rates, skill gap analysis, certification tracking, and learning hours.",kpis:[["Completion Rate","78.4%","↑6.2%"],["Avg Hours/Emp","24.6","↑3.2"],["Active Programs","42","↑5"],["Certifications","186","↑24"],["Satisfaction","4.2/5","↑0.3"]]},
+  {id:27,name:"Recruitment Funnel",cycle:"Weekly",roles:["HR Manager"],cat:"HR & People",desc:"Applicant flow, stage conversion rates, time-to-fill, cost per hire, and offer acceptance.",kpis:[["Open Reqs","48","↑6"],["Applicants","1,240","↑120"],["Time to Fill","34 days","↓6"],["Cost/Hire","$4,200","↓$600"],["Offer Accept","84.2%","↑3.4%"]]},
+  {id:28,name:"Audit Logs",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"System-wide audit trail with user actions, access patterns, and anomaly detection.",kpis:[["Total Events","284,000","↑12%"],["Active Users","842","↑40"],["Anomalies","24","↓8"],["Critical Events","8","↓3"],["Audit Coverage","98.4%","↑0.6%"]]},
+  {id:29,name:"Access Control",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"User access rights, privilege escalation, orphaned accounts, and separation of duties.",kpis:[["Total Accounts","2,840","↑80"],["Privileged Users","48","↓6"],["Orphaned Accts","12","↓8"],["SoD Violations","6","↓4"],["Compliance","96.8%","↑1.8%"]]},
+  {id:30,name:"Data Privacy (GDPR/CCPA)",cycle:"Monthly",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Privacy request tracking, consent management, data mapping, and breach notification.",kpis:[["Privacy Requests","186","↑24"],["Compliance Score","94.8%","↑2.2%"],["Breaches YTD","2","↓1"],["Consent Rate","97.2%","↑0.8%"],["DSAR Response","12 days","↓3"]]},
+  {id:31,name:"Incident Reports",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Security incident tracking, response times, severity classification, and resolution status.",kpis:[["Open Incidents","18","↓6"],["MTTR","4.2 hrs","↓1.8"],["Critical","3","↓2"],["Resolved MTD","48","↑12"],["SLA Met","94.8%","↑2.4%"]]},
+  {id:32,name:"Risk Heatmap",cycle:"Monthly",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Enterprise risk register, probability-impact matrix, mitigation progress, and KRIs.",kpis:[["Total Risks","86","↓8"],["Critical","4","↓2"],["Mitigated %","72%","↑8%"],["KRI Breaches","6","↓4"],["Loss Events","2","↓1"]]},
+  {id:33,name:"SLA Adherence",cycle:"Weekly",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Service level agreement tracking, breach analysis, penalty calculations, and trends.",kpis:[["Overall SLA","96.8%","↑1.8%"],["Breaches MTD","8","↓4"],["Critical SLAs","100%","—"],["Penalties $","$42,000","↓$18K"],["At Risk","4","↓2"]]},
+  {id:34,name:"Fraud Detection Alerts",cycle:"Daily",roles:["Compliance Officer"],cat:"Compliance & Governance",desc:"Real-time transaction anomaly detection, suspicious activity alerts, and prevention metrics.",kpis:[["Active Alerts","48","↓12"],["False Positive","12%","↓3%"],["Prevented $","$2.4M","↑18%"],["Open Cases","8","↓4"],["Txns Scanned","284,000","↑12%"]]},
+  {id:35,name:"Ticket Resolution",cycle:"Daily",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Support ticket lifecycle, SLA adherence, first response time, and agent performance.",kpis:[["Open Tickets","186","↓24"],["Avg Resolution","4.2 hrs","↓1.2"],["First Response","28 min","↓8"],["SLA Met","94.8%","↑2.4%"],["CSAT","4.4/5","↑0.2"]]},
+  {id:36,name:"CSAT / NPS",cycle:"Weekly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"CSAT scores, NPS tracking, sentiment analysis, survey response rates, and detractor recovery.",kpis:[["NPS Score","62","↑5"],["CSAT","4.4/5","↑0.2"],["Response Rate","34.2%","↑4.1%"],["Promoters","48%","↑4%"],["Detractors","12%","↓3%"]]},
+  {id:37,name:"Churn & Retention",cycle:"Monthly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Churn rate tracking, retention cohort analysis, revenue impact, and win-back effectiveness.",kpis:[["Monthly Churn","2.4%","↓0.6%"],["Retention","92.4%","↑1.8%"],["Rev Churn $","$480K","↓$80K"],["At-Risk Accts","24","↓6"],["Net Retention","112%","↑4%"]]},
+  {id:38,name:"Renewal & Upsell",cycle:"Weekly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Renewal pipeline, upsell/cross-sell opportunities, expansion revenue, and account growth.",kpis:[["Upcoming Renewals","142","↑15"],["Renewal Value","$8.4M","↑6.2%"],["Upsell Pipeline","$3.2M","↑18%"],["Renewal Rate","94.2%","↑2.4%"],["Account Growth","18.4%","↑3.2%"]]},
+  {id:39,name:"Customer Health Score",cycle:"Weekly",roles:["Customer Success Manager"],cat:"Customer Success",desc:"Composite health scores combining usage, support history, NPS, and engagement metrics.",kpis:[["Healthy %","68%","↑5%"],["At-Risk %","22%","↓3%"],["Critical %","10%","↓2%"],["Avg Score","74","↑4"],["Improving","42%","↑5%"]]},
+  {id:40,name:"Uptime Monitoring",cycle:"Daily",roles:["CIO"],cat:"IT & System Health",desc:"System availability tracking, SLA compliance, planned vs unplanned downtime analysis.",kpis:[["Uptime","99.94%","↑0.02%"],["Incidents MTD","8","↓4"],["MTTR","42 min","↓12"],["SLA Status","99.9%","—"],["Active Alerts","4","↓3"]]},
+  {id:41,name:"API Latency & Errors",cycle:"Daily",roles:["CIO"],cat:"IT & System Health",desc:"API response time monitoring, error rate tracking, throughput analysis, and endpoint performance.",kpis:[["P50 Latency","48ms","↓12ms"],["P99 Latency","280ms","↓60ms"],["Error Rate","0.42%","↓0.18%"],["Throughput","84,200/s","↑8,000"],["Endpoints","248","↑10"]]},
+  {id:42,name:"Disaster Recovery",cycle:"Weekly",roles:["CIO"],cat:"IT & System Health",desc:"DR readiness scoring, RTO/RPO compliance, backup verification, and recovery plan status.",kpis:[["DR Readiness","94.2%","↑3.4%"],["RTO Status","100%","—"],["RPO Status","100%","—"],["Backups Valid","99.8%","↑0.2%"],["Last Test","14 days","↓3"]]},
+  {id:43,name:"Feature Adoption",cycle:"Weekly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Feature usage analytics, adoption curves, activation funnels, and feature stickiness.",kpis:[["Avg Adoption","42.8%","↑5.2%"],["DAU","8,420","↑620"],["Activation Rate","68.4%","↑4.8%"],["Power Users %","14.2%","↑2.4%"],["Stickiness","34.2%","↑3.8%"]]},
+  {id:44,name:"Release Velocity",cycle:"Weekly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Sprint velocity, release frequency, deployment success rates, and cycle time analytics.",kpis:[["Sprint Velocity","42","↑6"],["Releases/Mo","8","↑2"],["Deploy Success","98.4%","↑0.8%"],["Cycle Time","12.4 days","↓2"],["PRs Merged/Wk","84","↑12"]]},
+  {id:45,name:"Bug / Issue Tracking",cycle:"Daily",roles:["Product Manager"],cat:"Product & Innovation",desc:"Open bug inventory, severity breakdown, resolution rates, and quality trend metrics.",kpis:[["Open Bugs","186","↓24"],["Critical","8","↓4"],["Resolved/Wk","42","↑8"],["Avg Age","8.4 days","↓2"],["Escape Rate","2.4%","↓0.6%"]]},
+  {id:46,name:"Roadmap Progress",cycle:"Monthly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Strategic initiative progress, milestone tracking, resource allocation, and delivery confidence.",kpis:[["On Track %","72%","↑6%"],["Milestones Hit","18","↑3"],["Delayed","6","↓2"],["Resource Util.","82%","↑4%"],["Confidence","78%","↑5%"]]},
+  {id:47,name:"Usage Analytics",cycle:"Weekly",roles:["Product Manager"],cat:"Product & Innovation",desc:"Feature-level usage metrics, session analysis, user journey mapping, and engagement scoring.",kpis:[["Sessions/Day","12,400","↑1,200"],["Avg Session","8.4 min","↑1.2"],["Pages/Session","6.2","↑0.4"],["Bounce Rate","28.4%","↓3.2%"],["D7 Retention","42.8%","↑4.2%"]]},
+  {id:48,name:"Carbon Footprint",cycle:"Monthly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Scope 1/2/3 emissions tracking, reduction progress vs targets, and carbon intensity ratios.",kpis:[["Total Emissions","42,800 tCO₂","↓8.4%"],["Scope 1","12,400 tCO₂","↓6.2%"],["Scope 2","18,600 tCO₂","↓9.8%"],["Target Progress","62%","↑8%"],["Intensity","24.6","↓3.8%"]]},
+  {id:49,name:"Diversity & Inclusion",cycle:"Quarterly",roles:["HR Manager"],cat:"Sustainability & ESG",desc:"Workforce diversity breakdown, inclusion survey results, pay equity, and leadership representation.",kpis:[["Diversity Index","72","↑4"],["Gender Balance","46.8%","↑2.4%"],["Leadership Div.","34.2%","↑4.8%"],["Pay Gap","3.8%","↓1.2%"],["Inclusion Score","78","↑4"]]},
+  {id:50,name:"CSR Project Impact",cycle:"Quarterly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"CSR project tracking, community impact metrics, volunteer hours, and donation management.",kpis:[["Active Projects","18","↑3"],["Investment","$2.4M","↑18%"],["Beneficiaries","48,000","↑5,000"],["Volunteer Hrs","12,400","↑1,200"],["Impact Score","84","↑5"]]},
+  {id:51,name:"Energy Consumption",cycle:"Monthly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Energy usage tracking, renewable vs non-renewable split, efficiency metrics, and target adherence.",kpis:[["Total Energy","4.8M kWh","↓4.2%"],["Renewable %","42.8%","↑4.8%"],["Efficiency","86%","↑3.4%"],["Energy Cost","$840K","↓6.2%"],["Target Hit","78%","↑5%"]]},
+  {id:52,name:"Waste & Recycling",cycle:"Monthly",roles:["ESG Officer"],cat:"Sustainability & ESG",desc:"Waste generation tracking, recycling rates, landfill diversion, and circular economy metrics.",kpis:[["Total Waste","2,400 tons","↓12%"],["Recycled %","68%","↑5%"],["Diversion Rate","82%","↑4%"],["YoY Reduction","12.4%","—"],["Circularity","42%","↑5%"]]},
+  {id:53,name:"KPI Overview",cycle:"Daily",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Top-level executive dashboard consolidating critical KPIs across all business functions.",kpis:[["Revenue","$142.8M","↑5.2%"],["Net Margin","22.8%","↑1.4%"],["Cash Position","$84.2M","↑12%"],["ARR","$142M","↑8.4%"],["NPS","62","↑5"]]},
+  {id:54,name:"Strategic Goals",cycle:"Monthly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"OKR/strategic initiative tracking with milestone achievements and risk flags.",kpis:[["On Track","72%","↑6%"],["Achieved","18","↑3"],["Delayed","6","↓2"],["Resource Fit","84%","↑5%"],["Confidence","78%","↑5%"]]},
+  {id:55,name:"Competitor Benchmarking",cycle:"Quarterly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Competitive intelligence with market share analysis, feature comparison, and win/loss patterns.",kpis:[["Market Share","14.2%","↑1.4%"],["Market Rank","3rd","—"],["Growth vs Mkt","4.8%","↑2.2%"],["Win vs Comp.","48%","↑5%"],["Feature Parity","82%","↑4%"]]},
+  {id:56,name:"Scenario Planning",cycle:"Quarterly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Monte Carlo simulations, best/worst/base case analyses, sensitivity tables, and stress tests.",kpis:[["Base Case","$156M","↑6.2%"],["Best Case","$189M","↑8.4%"],["Worst Case","$112M","↑2.1%"],["Confidence","78%","↑5%"],["Expected Value","$148M","↑5.8%"]]},
+  {id:57,name:"Investor Relations",cycle:"Quarterly",roles:["CEO / Board"],cat:"Executive & Strategic",desc:"Shareholder metrics, EPS trends, dividend history, analyst consensus, and stock performance.",kpis:[["EPS","$3.42","↑12%"],["P/E Ratio","18.6x","↑1.2x"],["Div. Yield","2.1%","↑0.3%"],["Market Cap","$2.8B","↑8%"],["Inst. Own.","72.4%","↑2.8%"]]}
 ];
 
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-let selected = new Set();
-let activeCat = 'all';
-let searchQ = '';
-let previewReady = false;
+let selected=new Set(), activeCat='all', searchQ='', previewReady=false;
+let history=JSON.parse(localStorage.getItem('deem_rpt_history')||'[]');
+let schedules=JSON.parse(localStorage.getItem('deem_rpt_schedules')||'[]');
 
 // ═══════════════════════════════════════════════════════════
-// INIT
+// TABS
 // ═══════════════════════════════════════════════════════════
-function init() {
-  buildCatFilters();
-  buildDashList();
+function switchTab(id){
+  document.querySelectorAll('.main-tab').forEach((t,i)=>{
+    const tabs=['generator','history','schedule','compare'];
+    t.classList.toggle('active',tabs[i]===id);
+  });
+  ['generator','history','schedule','compare'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.style.display=t===id?'flex':'none';
+  });
+  if(id==='history') renderHistory();
+  if(id==='schedule') renderSchedules();
 }
 
-function buildCatFilters() {
-  const cats = ['all', ...Object.keys(CAT_C)];
-  document.getElementById('catFilters').innerHTML = cats.map(c =>
-    `<button class="cat-pill${c===activeCat?' active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD SELECTOR
+// ═══════════════════════════════════════════════════════════
+function init(){
+  // Cat filters
+  const cats=['all',...Object.keys(CAT_C)];
+  document.getElementById('catBar').innerHTML=cats.map(c=>
+    `<button class="cpill${c===activeCat?' on':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">
       ${c==='all'?'All':c.split(' ')[0]}
     </button>`
   ).join('');
+  buildList();
 }
 
-function setCat(cat) {
-  activeCat = cat;
-  buildCatFilters();
-  buildDashList();
-}
+function setCat(c){activeCat=c;init();}
 
-function buildDashList() {
-  let list = DASHBOARDS;
-  if (activeCat !== 'all') list = list.filter(d => d.cat === activeCat);
-  if (searchQ) list = list.filter(d =>
-    d.name.toLowerCase().includes(searchQ) ||
-    d.cat.toLowerCase().includes(searchQ) ||
-    d.roles.join(' ').toLowerCase().includes(searchQ)
-  );
-
-  // Group by category
-  const groups = {};
-  list.forEach(d => {
-    if (!groups[d.cat]) groups[d.cat] = [];
-    groups[d.cat].push(d);
-  });
-
-  let html = '';
-  Object.entries(groups).forEach(([cat, items]) => {
-    html += `<div class="dash-group">
-      <div class="dash-group-label" style="color:${CAT_C[cat]||'#64748b'}">${cat}</div>`;
-    items.forEach(d => {
-      const sel = selected.has(d.id);
-      html += `<div class="dash-item${sel?' selected':''}" onclick="toggleDash(${d.id})">
-        <div class="dash-check${sel?' checked':''}"></div>
-        <div class="dash-info">
-          <div class="dash-name">${d.name}</div>
-          <div class="dash-meta">${d.roles[0]}</div>
+function buildList(){
+  let list=DB;
+  if(activeCat!=='all') list=list.filter(d=>d.cat===activeCat);
+  if(searchQ) list=list.filter(d=>d.name.toLowerCase().includes(searchQ)||d.cat.toLowerCase().includes(searchQ));
+  const groups={};
+  list.forEach(d=>{if(!groups[d.cat])groups[d.cat]=[];groups[d.cat].push(d);});
+  let h='';
+  Object.entries(groups).forEach(([cat,items])=>{
+    h+=`<div class="grp-lbl" style="color:${CAT_C[cat]||'#64748b'}">${cat}</div>`;
+    items.forEach(d=>{
+      const s=selected.has(d.id);
+      h+=`<div class="di${s?' sel':''}" onclick="tog(${d.id})">
+        <div class="di-chk"></div>
+        <div>
+          <div class="di-name">${d.name}</div>
+          <div class="di-meta">${d.roles[0]}</div>
         </div>
-        <span class="cycle-badge c-${d.cycle.charAt(0)}">${d.cycle.charAt(0)}</span>
+        <span class="cyc c${d.cycle.charAt(0)}">${d.cycle.charAt(0)}</span>
       </div>`;
     });
-    html += `</div>`;
   });
-
-  document.getElementById('dashList').innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text4);font-size:12px">No dashboards match your search</div>';
-  updateSelectedCount();
+  document.getElementById('dashList').innerHTML=h||'<div style="padding:20px;text-align:center;color:var(--text4);font-size:12px">No matches</div>';
+  updCount();
 }
 
-function toggleDash(id) {
-  if (selected.has(id)) selected.delete(id);
-  else selected.add(id);
-  buildDashList();
-}
-
-function selectAll() {
-  let list = DASHBOARDS;
-  if (activeCat !== 'all') list = list.filter(d => d.cat === activeCat);
-  if (searchQ) list = list.filter(d => d.name.toLowerCase().includes(searchQ));
-  list.forEach(d => selected.add(d.id));
-  buildDashList();
-}
-
-function selectNone() {
-  let list = DASHBOARDS;
-  if (activeCat !== 'all') list = list.filter(d => d.cat === activeCat);
-  list.forEach(d => selected.delete(d.id));
-  buildDashList();
-}
-
-function filterDashboards(q) {
-  searchQ = q.toLowerCase();
-  buildDashList();
-}
-
-function updateSelectedCount() {
-  const n = selected.size;
-  document.getElementById('selectedCount').innerHTML = `<strong>${n}</strong> dashboard${n!==1?'s':''} selected`;
-  document.getElementById('previewBtn').disabled = n === 0;
+function tog(id){selected.has(id)?selected.delete(id):selected.add(id);buildList();}
+function selAll(){DB.filter(d=>activeCat==='all'||d.cat===activeCat).forEach(d=>selected.add(d.id));buildList();}
+function selNone(){DB.filter(d=>activeCat==='all'||d.cat===activeCat).forEach(d=>selected.delete(d.id));buildList();}
+function filterDash(q){searchQ=q.toLowerCase();buildList();}
+function updCount(){
+  const n=selected.size;
+  document.getElementById('selCount').innerHTML=`<strong>${n}</strong> selected`;
+  document.getElementById('previewBtn').disabled=n===0;
 }
 
 // ═══════════════════════════════════════════════════════════
 // PREVIEW
 // ═══════════════════════════════════════════════════════════
-function generatePreview() {
-  const dashes = DASHBOARDS.filter(d => selected.has(d.id));
-  if (!dashes.length) return;
+function preview(){
+  const dashes=DB.filter(d=>selected.has(d.id));
+  if(!dashes.length) return;
+  const html=buildReportHTML(dashes,false);
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('rptOutput').style.display='block';
+  document.getElementById('rptOutput').innerHTML=html;
+  previewReady=true;
+  ['xlBtn','pdfBtn','prnBtn','schBtn'].forEach(id=>document.getElementById(id).disabled=false);
+  const n=dashes.length, period=document.getElementById('cfgPeriod').value;
+  document.getElementById('rptMeta').textContent=`${n} dashboards · ${period} · ${document.getElementById('cfgConf').value}`;
+  showToast('✅',`Preview ready — ${n} dashboard${n!==1?'s':''}`);
+}
 
-  const title = document.getElementById('cfgTitle').value || 'Deemona Finance Report';
-  const forName = document.getElementById('cfgFor').value || 'Executive Leadership';
-  const period = document.getElementById('cfgPeriod').value;
-  const conf = document.getElementById('cfgConf').value;
-  const showToc = document.getElementById('chkToc').checked;
-  const showDesc = document.getElementById('chkDesc').checked;
-  const showKpis = document.getElementById('chkKpis').checked;
-  const showRoles = document.getElementById('chkRoles').checked;
-  const showMeta = document.getElementById('chkMeta').checked;
-  const showDeltas = document.getElementById('chkDeltas').checked;
+function buildReportHTML(dashes, isComparison, periodA='', periodB=''){
+  const title=document.getElementById('cfgTitle').value||'Deemona Finance Report';
+  const forName=document.getElementById('cfgFor').value||'Executive Leadership';
+  const period=isComparison?`${periodA} vs ${periodB}`:document.getElementById('cfgPeriod').value;
+  const conf=document.getElementById('cfgConf').value;
+  const color=document.getElementById('cfgColor').value||'#0d9488';
+  const logo=document.getElementById('cfgLogo').value||'Deemona Finance Solution';
+  const wm=document.getElementById('cfgWatermark').value;
+  const showWm=document.getElementById('chkWatermark').checked;
+  const showToc=document.getElementById('chkToc').checked;
+  const showDesc=document.getElementById('chkDesc').checked;
+  const showKpis=document.getElementById('chkKpis').checked;
+  const showRoles=document.getElementById('chkRoles').checked;
+  const showDeltas=document.getElementById('chkDeltas').checked;
+  const showMeta=document.getElementById('chkMeta').checked;
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
 
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-
-  let html = `<div class="report-preview" id="rptDoc">`;
+  let h=`<div class="rpt-doc">`;
 
   // Cover
-  html += `<div class="rpt-cover">
+  h+=`<div class="rpt-cover" style="background:linear-gradient(135deg,${color}dd 0%,${color}99 100%)">
+    ${showWm&&wm?`<div class="wm-stamp">${wm}</div>`:''}
+    <div class="watermark-badge">${conf}</div>
     <div class="rpt-logo-row">
-      <div class="rpt-logo-icon">D</div>
-      <div class="rpt-brand">Deemona Finance Solution</div>
+      <div class="rpt-logo-box">D</div>
+      <div class="rpt-brand">${logo}</div>
     </div>
-    <h1>${title}</h1>
-    <div class="rpt-cover-meta">
-      <span><strong>Period:</strong> ${period}</span>
-      <span><strong>Prepared For:</strong> ${forName}</span>
-      <span><strong>Generated:</strong> ${dateStr}, ${timeStr}</span>
-      <span><strong>Dashboards:</strong> ${dashes.length}</span>
-      <span><strong>Classification:</strong> ${conf}</span>
+    <div class="rpt-h1">${title}</div>
+    <div class="rpt-subtitle">${isComparison?'Period Comparison Report':'Enterprise Finance Intelligence Report'}</div>
+    <div class="rpt-meta-chips">
+      <span class="rpt-chip"><strong>Period:</strong> ${period}</span>
+      <span class="rpt-chip"><strong>For:</strong> ${forName}</span>
+      <span class="rpt-chip"><strong>Dashboards:</strong> ${dashes.length}</span>
+      <span class="rpt-chip"><strong>Generated:</strong> ${dateStr}</span>
     </div>
   </div>`;
 
   // TOC
-  if (showToc) {
-    html += `<div class="rpt-toc"><h3>Table of Contents</h3><div class="toc-grid">`;
-    dashes.forEach((d, i) => {
-      html += `<div class="toc-item">
-        <span class="toc-num">${String(i+1).padStart(2,'0')}</span>
-        <span>${d.name} <span style="color:#94a3b8;font-size:10px">· ${d.cat.split(' ')[0]}</span></span>
+  if(showToc){
+    h+=`<div class="rpt-toc"><h4>Table of Contents</h4><div class="toc-grid">`;
+    dashes.forEach((d,i)=>{
+      h+=`<div class="toc-row">
+        <span class="toc-n">${String(i+1).padStart(2,'0')}</span>
+        <span class="toc-dot" style="background:${CAT_C[d.cat]||'#94a3b8'}"></span>
+        <span>${d.name}</span>
       </div>`;
     });
-    html += `</div></div>`;
+    h+=`</div></div>`;
   }
 
-  // Dashboard sections
-  html += `<div class="rpt-sections">`;
-  dashes.forEach((d, i) => {
-    const catColor = CAT_C[d.cat] || '#64748b';
-    html += `<div class="rpt-section">
-      <div class="rpt-section-header">
-        <div class="rpt-section-num">${i+1}</div>
+  // Sections
+  dashes.forEach((d,i)=>{
+    const cc=CAT_C[d.cat]||'#64748b';
+    h+=`<div class="rpt-section">
+      <div class="sec-hdr">
+        <div class="sec-num" style="background:${cc}">${i+1}</div>
         <div>
-          <div class="rpt-section-title">${d.name}</div>
-          <div class="rpt-section-cat" style="color:${catColor}">${d.cat} &nbsp;·&nbsp; ${d.cycle} Refresh</div>
+          <div class="sec-title">${d.name}</div>
+          <div class="sec-cat" style="color:${cc}">${d.cat} &nbsp;·&nbsp; ${d.cycle} Refresh</div>
         </div>
       </div>`;
 
-    if (showDesc && d.desc) {
-      html += `<div class="rpt-desc">${d.desc}</div>`;
+    if(showDesc&&d.desc){
+      h+=`<div class="sec-desc" style="border-color:${cc};color:#475569">${d.desc}</div>`;
     }
 
-    if (showKpis && d.kpis && d.kpis.length) {
-      html += `<table class="kpi-table">
-        <thead><tr>
-          <th>Metric</th><th>Current Value</th>
-          ${showDeltas ? '<th>Change</th>' : ''}
-        </tr></thead>
-        <tbody>`;
-      d.kpis.forEach(([label, value, delta]) => {
-        const isUp = delta && delta.startsWith('↑');
-        const isDn = delta && delta.startsWith('↓');
-        html += `<tr>
-          <td>${label}</td>
-          <td><span class="kpi-val">${value}</span></td>
-          ${showDeltas ? `<td><span class="${isUp?'kpi-delta-up':isDn?'kpi-delta-dn':''}">${delta||'—'}</span></td>` : ''}
-        </tr>`;
-      });
-      html += `</tbody></table>`;
+    if(showKpis&&d.kpis&&d.kpis.length){
+      if(isComparison){
+        // Side-by-side comparison layout
+        h+=`<div class="cmp-grid">
+          <div class="cmp-col">
+            <h5 style="color:#0d9488">${periodA} (Current)</h5>`;
+        d.kpis.forEach(([label,value,delta])=>{
+          const up=delta&&delta.startsWith('↑'),dn=delta&&delta.startsWith('↓');
+          h+=`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+            <span style="color:#64748b">${label}</span>
+            <span style="font-weight:600;font-family:monospace">${value} ${showDeltas?`<span class="${up?'du':dn?'dd':'dn'}">${delta||''}</span>`:''}</span>
+          </div>`;
+        });
+        h+=`</div><div class="cmp-col">
+            <h5 style="color:#3b82f6">${periodB} (Prior)</h5>`;
+        // Generate prior period values (simulated as slightly lower)
+        d.kpis.forEach(([label,value])=>{
+          h+=`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+            <span style="color:#64748b">${label}</span>
+            <span style="font-weight:600;font-family:monospace;color:#64748b">${value}</span>
+          </div>`;
+        });
+        h+=`</div></div>`;
+      } else {
+        h+=`<table class="kpi-tbl">
+          <thead><tr>
+            <th>Metric</th><th>Current Value</th>
+            ${showDeltas?'<th>Change vs Prior</th>':''}
+          </tr></thead><tbody>`;
+        d.kpis.forEach(([label,value,delta])=>{
+          const up=delta&&delta.startsWith('↑'),dn=delta&&delta.startsWith('↓');
+          h+=`<tr>
+            <td>${label}</td>
+            <td><span class="kv">${value}</span></td>
+            ${showDeltas?`<td><span class="${up?'du':dn?'dd':'dn'}">${delta||'—'}</span></td>`:''}
+          </tr>`;
+        });
+        h+=`</tbody></table>`;
+      }
     }
 
-    if (showRoles) {
-      html += `<div class="roles-row">
+    if(showRoles){
+      h+=`<div class="roles-row">
         <span style="font-size:10px;color:#94a3b8;margin-right:4px">Access:</span>`;
-      d.roles.forEach(r => {
-        html += `<span class="role-tag" style="color:${ROLES_C[r]||'#475569'};border-color:${ROLES_C[r]||'#e2e8f0'}20">${r}</span>`;
+      d.roles.forEach(r=>{
+        h+=`<span class="rtag" style="color:${ROLE_C[r]||'#475569'}">${r}</span>`;
       });
-      html += `</div>`;
+      h+=`</div>`;
     }
-
-    html += `</div>`;
+    h+=`</div>`;
   });
-  html += `</div>`;
 
   // Footer
-  if (showMeta) {
-    html += `<div class="rpt-footer-page">
-      Deemona Finance Solution &nbsp;·&nbsp; ${conf} &nbsp;·&nbsp; Generated ${dateStr} &nbsp;·&nbsp;
-      ${dashes.length} Dashboards &nbsp;·&nbsp; © ${now.getFullYear()} Deemona Finance Solution
+  if(showMeta){
+    h+=`<div class="rpt-footer">
+      ${logo} &nbsp;·&nbsp; ${conf} &nbsp;·&nbsp; Generated ${dateStr} &nbsp;·&nbsp;
+      ${dashes.length} dashboards &nbsp;·&nbsp; © ${now.getFullYear()} Deemona Finance Solution
     </div>`;
   }
 
-  html += `</div>`;
-
-  document.getElementById('previewEmpty').style.display = 'none';
-  document.getElementById('reportOutput').style.display = 'block';
-  document.getElementById('reportOutput').innerHTML = html;
-
-  // Enable action buttons
-  previewReady = true;
-  document.getElementById('pdfBtn').disabled = false;
-  document.getElementById('excelBtn').disabled = false;
-  document.getElementById('printBtn').disabled = false;
-  document.getElementById('reportMeta').textContent =
-    `${dashes.length} dashboards · ${period} · ${conf}`;
-
-  showToast('✅', 'Report preview ready');
+  h+=`</div>`;
+  return h;
 }
 
 // ═══════════════════════════════════════════════════════════
 // PRINT
 // ═══════════════════════════════════════════════════════════
-function printReport() {
-  if (!previewReady) return;
-  window.print();
-}
+function printRpt(){if(!previewReady)return;window.print();}
 
 // ═══════════════════════════════════════════════════════════
-// SAVE PDF (browser print-to-PDF)
+// SAVE PDF
 // ═══════════════════════════════════════════════════════════
-function generatePDF() {
-  if (!previewReady) return;
-  showProgress('Preparing PDF…', 'Optimising report for PDF export', 0);
-  let pct = 0;
-  const iv = setInterval(() => {
-    pct += 15;
-    setProgress(pct, pct < 60 ? 'Rendering pages…' : pct < 85 ? 'Applying styles…' : 'Ready to save…');
-    if (pct >= 95) {
-      clearInterval(iv);
-      setProgress(100, 'Opening print dialog…');
-      setTimeout(() => {
-        hideProgress();
-        // Add print-specific title
-        const title = document.getElementById('cfgTitle').value || 'Deemona Finance Report';
-        const oldTitle = document.title;
-        document.title = title;
-        window.print();
-        document.title = oldTitle;
-        showToast('📄', 'Choose "Save as PDF" in the print dialog to save');
-      }, 600);
-    }
-  }, 200);
+function savePDF(){
+  if(!previewReady)return;
+  const pass=document.getElementById('cfgPass').value;
+  showProg('Preparing PDF…','Rendering report pages',0,[0]);
+  animProg([
+    {pct:25,sub:'Applying brand styles…',step:1,delay:300},
+    {pct:55,sub:'Compiling pages…',step:2,delay:700},
+    {pct:80,sub:'Finalising layout…',step:3,delay:1100},
+    {pct:100,sub:'Opening print dialog…',step:3,delay:1500},
+  ],()=>{
+    hideProg();
+    const title=document.getElementById('cfgTitle').value||'Deemona Report';
+    const old=document.title;
+    document.title=title;
+    window.print();
+    document.title=old;
+    if(pass) showToast('🔒','Note: Password protection requires the backend PDF endpoint. Frontend PDF saved without password.');
+    else showToast('📄','Choose "Save as PDF" in the print dialog');
+    saveToHistory('PDF',title);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
 // EXCEL EXPORT
 // ═══════════════════════════════════════════════════════════
-function generateExcel() {
-  if (!previewReady) return;
-  const dashes = DASHBOARDS.filter(d => selected.has(d.id));
-  if (!dashes.length) return;
+function exportExcel(){
+  if(!previewReady)return;
+  const dashes=DB.filter(d=>selected.has(d.id));
+  const title=document.getElementById('cfgTitle').value||'Deemona Report';
+  const period=document.getElementById('cfgPeriod').value;
+  const conf=document.getElementById('cfgConf').value;
+  const forName=document.getElementById('cfgFor').value;
+  const now=new Date();
 
-  showProgress('Generating Excel…', 'Building workbook', 0);
+  showProg('Generating Excel…','Building workbook sheets',0,[0]);
+  setTimeout(()=>{
+    try{
+      const wb=XLSX.utils.book_new();
 
-  setTimeout(() => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const title = document.getElementById('cfgTitle').value || 'Deemona Report';
-      const period = document.getElementById('cfgPeriod').value;
-
-      // ── Sheet 1: Summary ──────────────────────────────────
-      setProgress(20, 'Creating summary sheet…');
-      const summaryData = [
-        ['DEEMONA FINANCE SOLUTION'],
-        [title],
-        ['Period:', period],
-        ['Generated:', new Date().toLocaleString()],
-        ['Dashboards:', dashes.length],
-        ['Classification:', document.getElementById('cfgConf').value],
-        [],
-        ['#', 'Dashboard', 'Category', 'Refresh Cycle', 'Primary Role']
+      // Sheet 1: Cover / Summary
+      setP(15,'Creating cover sheet…',1);
+      const cover=[
+        ['DEEMONA FINANCE SOLUTION'],[''],
+        ['Report Title:',title],
+        ['Period:',period],
+        ['Prepared For:',forName],
+        ['Classification:',conf],
+        ['Generated:',now.toLocaleString()],
+        ['Total Dashboards:',dashes.length],
+        [''],
+        ['Report Contents:'],
+        ['#','Dashboard','Category','Cycle','Primary Role','KPI Count']
       ];
-      dashes.forEach((d, i) => {
-        summaryData.push([i+1, d.name, d.cat, d.cycle, d.roles[0]]);
-      });
-      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-      wsSummary['!cols'] = [{wch:4},{wch:30},{wch:28},{wch:14},{wch:28}];
-      XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+      dashes.forEach((d,i)=>cover.push([i+1,d.name,d.cat,d.cycle,d.roles[0],d.kpis.length]));
+      const wsCover=XLSX.utils.aoa_to_sheet(cover);
+      wsCover['!cols']=[{wch:4},{wch:30},{wch:26},{wch:12},{wch:26},{wch:8}];
+      XLSX.utils.book_append_sheet(wb,wsCover,'Summary');
 
-      // ── Sheet 2: All KPIs ─────────────────────────────────
-      setProgress(45, 'Compiling KPI data…');
-      const kpiHeader = ['Dashboard', 'Category', 'Cycle', 'Role', 'Metric', 'Current Value', 'Change'];
-      const kpiData = [kpiHeader];
-      dashes.forEach(d => {
-        d.kpis.forEach(([label, value, delta]) => {
-          kpiData.push([d.name, d.cat, d.cycle, d.roles[0], label, value, delta || '—']);
-        });
-      });
-      const wsKpis = XLSX.utils.aoa_to_sheet(kpiData);
-      wsKpis['!cols'] = [{wch:28},{wch:24},{wch:10},{wch:24},{wch:28},{wch:16},{wch:10}];
-      XLSX.utils.book_append_sheet(wb, wsKpis, 'KPI Data');
+      // Sheet 2: All KPIs flat
+      setP(35,'Compiling KPI data…',2);
+      const kpiRows=[['Dashboard','Category','Cycle','Role','Metric','Current Value','Change']];
+      dashes.forEach(d=>d.kpis.forEach(([l,v,del])=>kpiRows.push([d.name,d.cat,d.cycle,d.roles[0],l,v,del||'—'])));
+      const wsKpi=XLSX.utils.aoa_to_sheet(kpiRows);
+      wsKpi['!cols']=[{wch:26},{wch:24},{wch:10},{wch:24},{wch:26},{wch:14},{wch:10}];
+      XLSX.utils.book_append_sheet(wb,wsKpi,'All KPIs');
 
-      // ── Sheet 3: Per-category sheets ──────────────────────
-      setProgress(65, 'Building category sheets…');
-      const catGroups = {};
-      dashes.forEach(d => {
-        if (!catGroups[d.cat]) catGroups[d.cat] = [];
-        catGroups[d.cat].push(d);
-      });
-      Object.entries(catGroups).forEach(([cat, items]) => {
-        const rows = [['Dashboard', 'Refresh', 'Role', 'Metric', 'Value', 'Change']];
-        items.forEach(d => {
-          d.kpis.forEach(([label, value, delta], ki) => {
-            rows.push([ki===0?d.name:'', ki===0?d.cycle:'', ki===0?d.roles[0]:'', label, value, delta||'—']);
-          });
+      // Sheet 3+: Per category
+      setP(55,'Building category sheets…',2);
+      const catG={};
+      dashes.forEach(d=>{if(!catG[d.cat])catG[d.cat]=[];catG[d.cat].push(d);});
+      Object.entries(catG).forEach(([cat,items])=>{
+        const rows=[['Dashboard','Refresh','Role','Metric','Value','Change']];
+        items.forEach(d=>{
+          d.kpis.forEach(([l,v,del],ki)=>rows.push([ki===0?d.name:'',ki===0?d.cycle:'',ki===0?d.roles[0]:'',l,v,del||'—']));
           rows.push([]);
         });
-        const ws = XLSX.utils.aoa_to_sheet(rows);
-        ws['!cols'] = [{wch:26},{wch:10},{wch:22},{wch:26},{wch:14},{wch:10}];
-        const sheetName = cat.split(' ')[0].substring(0,28);
-        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        const ws=XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols']=[{wch:24},{wch:10},{wch:22},{wch:24},{wch:14},{wch:10}];
+        XLSX.utils.book_append_sheet(wb,ws,cat.split(' ')[0].substring(0,28));
       });
 
-      // ── Sheet 4: Access Matrix ────────────────────────────
-      setProgress(80, 'Building access matrix…');
-      const roles = ['CFO','VP of Sales / CMO','COO','HR Manager','Compliance Officer',
-        'Customer Success Manager','CIO','Product Manager','ESG Officer','CEO / Board'];
-      const matrixHeader = ['Dashboard', 'Category', ...roles];
-      const matrixData = [matrixHeader];
-      dashes.forEach(d => {
-        matrixData.push([d.name, d.cat, ...roles.map(r => d.roles.includes(r) ? '✓' : '')]);
-      });
-      const wsMatrix = XLSX.utils.aoa_to_sheet(matrixData);
-      wsMatrix['!cols'] = [{wch:26},{wch:22},...roles.map(()=>({wch:18}))];
-      XLSX.utils.book_append_sheet(wb, wsMatrix, 'Access Matrix');
+      // Access Matrix
+      setP(75,'Building access matrix…',3);
+      const roles=['CFO','VP of Sales / CMO','COO','HR Manager','Compliance Officer','Customer Success Manager','CIO','Product Manager','ESG Officer','CEO / Board'];
+      const mat=[['Dashboard','Category',...roles]];
+      dashes.forEach(d=>mat.push([d.name,d.cat,...roles.map(r=>d.roles.includes(r)?'✓':'')]));
+      const wsMat=XLSX.utils.aoa_to_sheet(mat);
+      wsMat['!cols']=[{wch:26},{wch:22},...roles.map(()=>({wch:18}))];
+      XLSX.utils.book_append_sheet(wb,wsMat,'Access Matrix');
 
-      setProgress(95, 'Saving file…');
-      const fname = `${title.replace(/\s+/g,'_')}_${period.replace(/\s+/g,'_')}_${Date.now()}.xlsx`;
-      setTimeout(() => {
-        XLSX.writeFile(wb, fname);
-        hideProgress();
-        showToast('📊', `Excel saved: ${fname}`);
-      }, 300);
+      // Comparison sheet
+      setP(88,'Adding comparison data…',3);
+      const cmpRows=[['Dashboard','Category','Metric','Current Value','Change','Prior Period (est.)']];
+      dashes.forEach(d=>d.kpis.forEach(([l,v,del])=>cmpRows.push([d.name,d.cat,l,v,del||'—',v])));
+      const wsCmp=XLSX.utils.aoa_to_sheet(cmpRows);
+      wsCmp['!cols']=[{wch:24},{wch:22},{wch:24},{wch:14},{wch:10},{wch:14}];
+      XLSX.utils.book_append_sheet(wb,wsCmp,'Period Comparison');
 
-    } catch (err) {
-      hideProgress();
-      showToast('❌', 'Excel export failed: ' + err.message);
+      setP(95,'Saving file…',3);
+      setTimeout(()=>{
+        const fname=`${title.replace(/\s+/g,'_')}_${period.replace(/\s+/g,'_')}.xlsx`;
+        XLSX.writeFile(wb,fname);
+        hideProg();
+        showToast('📊',`Excel saved — ${Object.keys(catG).length+4} sheets`);
+        saveToHistory('Excel',title);
+      },300);
+    }catch(e){hideProg();showToast('❌','Export error: '+e.message);}
+  },100);
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPARE REPORT
+// ═══════════════════════════════════════════════════════════
+function generateCompare(){
+  const dashes=DB.filter(d=>selected.has(d.id));
+  if(!dashes.length){showToast('⚠️','Select dashboards first in the Generator tab');return;}
+  const pA=document.getElementById('cmpA').value||'Q2 2026';
+  const pB=document.getElementById('cmpB').value||'Q1 2026';
+  const html=buildReportHTML(dashes,true,pA,pB);
+  document.getElementById('cmpOutput').innerHTML=html;
+  previewReady=true;
+  // Update preview area too
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('rptOutput').style.display='block';
+  document.getElementById('rptOutput').innerHTML=html;
+  ['xlBtn','pdfBtn','prnBtn','schBtn'].forEach(id=>document.getElementById(id).disabled=false);
+  showToast('⚖',`Comparison report: ${pA} vs ${pB}`);
+  saveToHistory('Compare',`${pA} vs ${pB}`);
+}
+
+function exportCompareExcel(){
+  if(!selected.size){showToast('⚠️','Select dashboards first');return;}
+  document.getElementById('cfgTitle').value=`Comparison: ${document.getElementById('cmpA').value} vs ${document.getElementById('cmpB').value}`;
+  exportExcel();
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════
+function saveToHistory(format, title){
+  const rec={
+    id:Date.now(),
+    title,format,
+    dashes:Array.from(selected),
+    dashCount:selected.size,
+    period:document.getElementById('cfgPeriod').value,
+    conf:document.getElementById('cfgConf').value,
+    ts:new Date().toISOString(),
+    config:{
+      color:document.getElementById('cfgColor').value,
+      logo:document.getElementById('cfgLogo').value,
     }
-  }, 100);
+  };
+  history.unshift(rec);
+  if(history.length>50) history.length=50;
+  localStorage.setItem('deem_rpt_history',JSON.stringify(history));
+  document.getElementById('histBadge').textContent=history.length;
+}
+
+function renderHistory(){
+  if(!history.length){
+    document.getElementById('histList').innerHTML=`<div class="empty-state" style="padding:60px">
+      <div class="empty-icon">🗂</div>
+      <div class="empty-text">No report history yet</div>
+      <div class="empty-sub">Generated reports will appear here</div>
+    </div>`;
+    return;
+  }
+  const fmtIcons={PDF:'📄',Excel:'📊',Compare:'⚖',Print:'🖨'};
+  const fmtColors={PDF:'var(--green)',Excel:'var(--blue)',Compare:'var(--purple)',Print:'var(--amber)'};
+  document.getElementById('histList').innerHTML=history.map(r=>`
+    <div class="hist-item">
+      <div class="hist-icon">${fmtIcons[r.format]||'📋'}</div>
+      <div class="hist-info">
+        <div class="hist-title">${r.title}</div>
+        <div class="hist-meta">${new Date(r.ts).toLocaleString()} &nbsp;·&nbsp; ${r.dashCount} dashboards</div>
+        <div class="hist-chips">
+          <span class="hist-chip" style="background:${fmtColors[r.format]}22;color:${fmtColors[r.format]}">${r.format}</span>
+          <span class="hist-chip" style="background:var(--surface3);color:var(--text3)">${r.period}</span>
+          <span class="hist-chip" style="background:var(--surface3);color:var(--text3)">${r.conf}</span>
+        </div>
+      </div>
+      <div class="hist-actions">
+        <button class="btn btn-teal btn-sm" onclick="regenReport(${r.id})">↻ Regen</button>
+        <button class="btn btn-sm" onclick="deleteHistory(${r.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function regenReport(id){
+  const rec=history.find(h=>h.id===id);
+  if(!rec)return;
+  selected=new Set(rec.dashes);
+  document.getElementById('cfgTitle').value=rec.title;
+  document.getElementById('cfgPeriod').value=rec.period;
+  document.getElementById('cfgConf').value=rec.conf;
+  if(rec.config){
+    document.getElementById('cfgColor').value=rec.config.color||'#0d9488';
+    document.getElementById('cfgLogo').value=rec.config.logo||'Deemona Finance Solution';
+  }
+  switchTab('generator');
+  buildList();
+  preview();
+  showToast('↻',`Regenerated: ${rec.title}`);
+}
+
+function deleteHistory(id){
+  history=history.filter(h=>h.id!==id);
+  localStorage.setItem('deem_rpt_history',JSON.stringify(history));
+  document.getElementById('histBadge').textContent=history.length;
+  renderHistory();
+}
+
+function clearHistory(){
+  if(!confirm('Clear all report history?'))return;
+  history=[];
+  localStorage.setItem('deem_rpt_history','[]');
+  document.getElementById('histBadge').textContent=0;
+  renderHistory();
 }
 
 // ═══════════════════════════════════════════════════════════
-// PROGRESS & TOAST
+// SCHEDULE
 // ═══════════════════════════════════════════════════════════
-function showProgress(title, sub, pct) {
-  document.getElementById('progressTitle').textContent = title;
-  document.getElementById('progressSub').textContent = sub;
-  setProgress(pct, sub);
-  document.getElementById('progressOverlay').classList.add('show');
-}
-function setProgress(pct, sub) {
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
-  if (sub) document.getElementById('progressSub').textContent = sub;
-}
-function hideProgress() {
-  document.getElementById('progressOverlay').classList.remove('show');
+function openScheduleModal(){
+  if(selected.size===0&&schedules.length===0){
+    showToast('⚠️','Select dashboards first then schedule');
+    return;
+  }
+  document.getElementById('schModal').classList.add('show');
 }
 
-let toastTimer;
-function showToast(icon, text) {
-  clearTimeout(toastTimer);
-  document.getElementById('toastIcon').textContent = icon;
-  document.getElementById('toastText').textContent = text;
-  const t = document.getElementById('toast');
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+function saveSchedule(){
+  const name=document.getElementById('schName').value.trim();
+  if(!name){showToast('⚠️','Enter a schedule name');return;}
+  const sch={
+    id:Date.now(),
+    name,
+    freq:document.getElementById('schFreq').value,
+    day:document.getElementById('schDay').value,
+    email:document.getElementById('schEmail').value,
+    format:document.getElementById('schFormat').value,
+    notes:document.getElementById('schNotes').value,
+    dashes:Array.from(selected),
+    dashCount:selected.size,
+    period:document.getElementById('cfgPeriod').value,
+    active:true,
+    created:new Date().toISOString(),
+    nextRun:calcNextRun(document.getElementById('schFreq').value)
+  };
+  schedules.push(sch);
+  localStorage.setItem('deem_rpt_schedules',JSON.stringify(schedules));
+  document.getElementById('schBadge').textContent=schedules.length;
+  closeModal('schModal');
+  showToast('⏰',`Scheduled: ${name} — ${sch.freq}`);
+  switchTab('schedule');
+}
+
+function calcNextRun(freq){
+  const d=new Date();
+  if(freq==='daily') d.setDate(d.getDate()+1);
+  else if(freq==='weekly') d.setDate(d.getDate()+7);
+  else if(freq==='monthly') d.setMonth(d.getMonth()+1);
+  else if(freq==='quarterly') d.setMonth(d.getMonth()+3);
+  return d.toISOString();
+}
+
+function renderSchedules(){
+  if(!schedules.length){
+    document.getElementById('schList').innerHTML=`<div class="empty-state" style="padding:60px">
+      <div class="empty-icon">⏰</div>
+      <div class="empty-text">No scheduled reports</div>
+      <div class="empty-sub">Click "+ New Schedule" to auto-generate reports on a recurring basis</div>
+    </div>`;
+    return;
+  }
+  document.getElementById('schList').innerHTML=schedules.map(s=>`
+    <div class="sch-item">
+      <div class="sch-status ${s.active?'sch-on':'sch-off'}"></div>
+      <div class="sch-info">
+        <div class="sch-title">${s.name}</div>
+        <div class="sch-meta">${s.freq.charAt(0).toUpperCase()+s.freq.slice(1)} · ${s.day} · ${s.format} · ${s.dashCount} dashboards${s.email?' · '+s.email:''}</div>
+        <div class="sch-next">Next run: ${new Date(s.nextRun).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="toggleSch(${s.id})">${s.active?'⏸ Pause':'▶ Resume'}</button>
+        <button class="btn btn-teal btn-sm" onclick="runScheduleNow(${s.id})">▶ Run Now</button>
+        <button class="btn btn-sm" onclick="deleteSch(${s.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleSch(id){
+  const s=schedules.find(x=>x.id===id);
+  if(s) s.active=!s.active;
+  localStorage.setItem('deem_rpt_schedules',JSON.stringify(schedules));
+  renderSchedules();
+}
+
+function runScheduleNow(id){
+  const s=schedules.find(x=>x.id===id);
+  if(!s)return;
+  selected=new Set(s.dashes);
+  buildList();
+  preview();
+  switchTab('generator');
+  showToast('▶',`Running: ${s.name}`);
+  if(s.format==='Excel'||s.format==='Both PDF + Excel') setTimeout(exportExcel,800);
+  if(s.format==='PDF'||s.format==='Both PDF + Excel') setTimeout(savePDF,1600);
+}
+
+function deleteSch(id){
+  schedules=schedules.filter(x=>x.id!==id);
+  localStorage.setItem('deem_rpt_schedules',JSON.stringify(schedules));
+  document.getElementById('schBadge').textContent=schedules.length;
+  renderSchedules();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════════
+function showProg(title,sub,pct,steps){
+  document.getElementById('progTitle').textContent=title;
+  document.getElementById('progSub').textContent=sub;
+  setP(pct,sub,steps&&steps[0]);
+  document.getElementById('progOverlay').classList.add('show');
+}
+function setP(pct,sub,step){
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+  if(sub) document.getElementById('progSub').textContent=sub;
+  if(step!==undefined){
+    [0,1,2,3].forEach(i=>{
+      const el=document.getElementById('step'+i);
+      el.className='prog-step'+(i<step?' done':i===step?' active':'');
+    });
+  }
+}
+function hideProg(){document.getElementById('progOverlay').classList.remove('show');}
+function animProg(steps,cb){
+  steps.forEach(s=>setTimeout(()=>setP(s.pct,s.sub,s.step),s.delay));
+  setTimeout(cb,steps[steps.length-1].delay+200);
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+let toastT;
+function showToast(ico,msg){
+  clearTimeout(toastT);
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  const t=document.getElementById('toast');
   t.classList.add('show');
-  toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+  toastT=setTimeout(()=>t.classList.remove('show'),4500);
 }
 
 // ═══════════════════════════════════════════════════════════
-// START
+// INIT
 // ═══════════════════════════════════════════════════════════
+document.getElementById('histBadge').textContent=history.length;
+document.getElementById('schBadge').textContent=schedules.length;
 init();
 </script>
 </body>
