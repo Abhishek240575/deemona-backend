@@ -10,7 +10,7 @@ try { erpSync = require('../../jobs/erp-sync');                  } catch(e) { co
 
 const PKCE = new Map();
 function getTenantId(req) {
-  return req.user && req.user.tenant_id ? req.user.tenant_id : (req.query.tenant_id || (req.body && req.body.tenant_id) || 'default');
+  return req.user && req.user.tenant_id ? req.user.tenant_id : (req.query.tenant_id || (req.body && req.body.tenant_id) || 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
 }
 
 router.get('/status', async (req, res) => {
@@ -21,7 +21,7 @@ router.get('/status', async (req, res) => {
   ];
   try {
     const conns = await query(
-      "SELECT id, provider, status, last_sync_at, created_at, COALESCE(external_id,'') as external_id, COALESCE(metadata->>'company_name','') as company_name FROM data_connections WHERE tenant_id=$1 AND provider IN ('quickbooks','xero') ORDER BY created_at DESC",
+      "SELECT id, provider, status, last_sync_at, created_at FROM data_connections WHERE tenant_id=$1 AND provider IN ('quickbooks','xero') ORDER BY created_at DESC",
       [tenantId]
     );
     res.json({ connections: conns.rows, available_providers: providers });
@@ -49,12 +49,8 @@ router.get('/quickbooks/callback', async (req, res) => {
     const tokens = await QBO.exchangeCodeForTokens(code);
     const expiry = new Date(Date.now() + tokens.expires_in * 1000);
     await query(
-      "INSERT INTO data_connections (tenant_id, provider, status, created_at, updated_at) VALUES ($1, 'quickbooks', 'active', NOW(), NOW()) ON CONFLICT (tenant_id, provider) DO UPDATE SET status='active', updated_at=NOW()",
-      [tenantId]
-    );
-    await query(
-      "UPDATE data_connections SET external_id=$1, access_token=$2, refresh_token=$3, token_expires_at=$4, metadata=$5, updated_at=NOW() WHERE tenant_id=$6 AND provider='quickbooks'",
-      [realmId, tokens.access_token, tokens.refresh_token, expiry, JSON.stringify({ realm_id: realmId }), tenantId]
+      "UPDATE data_connections SET status='active', access_token=$1, refresh_token=$2, token_expires_at=$3, external_id=$4, metadata=$5, updated_at=NOW() WHERE tenant_id=$6 AND provider='quickbooks'",
+      [tokens.access_token, tokens.refresh_token, expiry, realmId, JSON.stringify({ realm_id: realmId }), tenantId]
     );
     if (erpSync) erpSync.syncTenant(tenantId, 'quickbooks', 'full').catch(console.error);
     res.redirect('/erp_integration.html?connected=quickbooks');
@@ -65,7 +61,7 @@ router.get('/quickbooks/callback', async (req, res) => {
 });
 
 router.get('/xero/connect', async (req, res) => {
-  if (!Xero) return res.status(503).json({ error: 'Xero not configured. Add XERO_CLIENT_ID and XERO_CLIENT_SECRET to Render environment.' });
+  if (!Xero) return res.status(503).json({ error: 'Xero not configured.' });
   const tenantId = getTenantId(req);
   const state = tenantId + ':' + crypto.randomBytes(16).toString('hex');
   try {
@@ -90,12 +86,8 @@ router.get('/xero/callback', async (req, res) => {
     const orgs = await Xero.getTenantConnections(tokens.access_token);
     const org = orgs && orgs[0] ? orgs[0] : {};
     await query(
-      "INSERT INTO data_connections (tenant_id, provider, status, created_at, updated_at) VALUES ($1, 'xero', 'active', NOW(), NOW()) ON CONFLICT (tenant_id, provider) DO UPDATE SET status='active', updated_at=NOW()",
-      [tenantId]
-    );
-    await query(
-      "UPDATE data_connections SET external_id=$1, access_token=$2, refresh_token=$3, token_expires_at=$4, metadata=$5, updated_at=NOW() WHERE tenant_id=$6 AND provider='xero'",
-      [org.tenantId || '', tokens.access_token, tokens.refresh_token, expiry, JSON.stringify({ company_name: org.tenantName || 'Xero' }), tenantId]
+      "UPDATE data_connections SET status='active', access_token=$1, refresh_token=$2, token_expires_at=$3, external_id=$4, metadata=$5, updated_at=NOW() WHERE tenant_id=$6 AND provider='xero'",
+      [tokens.access_token, tokens.refresh_token, expiry, org.tenantId || '', JSON.stringify({ company_name: org.tenantName || 'Xero' }), tenantId]
     );
     if (erpSync) erpSync.syncTenant(tenantId, 'xero', 'full').catch(console.error);
     res.redirect('/erp_integration.html?connected=xero&company=' + encodeURIComponent(org.tenantName || 'Xero'));
@@ -120,9 +112,7 @@ router.get('/sync-history', async (req, res) => {
   try {
     const h = await query("SELECT source, status, row_count, error_log, created_at FROM data_imports WHERE tenant_id=$1 AND source IN ('quickbooks','xero') ORDER BY created_at DESC LIMIT 50", [tenantId]);
     res.json(h.rows);
-  } catch (err) {
-    res.json([]);
-  }
+  } catch (err) { res.json([]); }
 });
 
 router.get('/kpis/:dashboardId', async (req, res) => {
@@ -132,9 +122,7 @@ router.get('/kpis/:dashboardId', async (req, res) => {
     const snap = await query("SELECT snapshot_data, source, refreshed_at FROM kpi_snapshots WHERE tenant_id=$1 AND dashboard_id=$2", [tenantId, dashboardId]);
     if (!snap.rows.length) return res.json({ kpis: {}, source: 'none' });
     res.json({ kpis: snap.rows[0].snapshot_data, source: snap.rows[0].source, refreshed_at: snap.rows[0].refreshed_at });
-  } catch (err) {
-    res.json({ kpis: {}, error: err.message });
-  }
+  } catch (err) { res.json({ kpis: {}, error: err.message }); }
 });
 
 router.get('/data-summary', async (req, res) => {
@@ -150,9 +138,7 @@ router.get('/data-summary', async (req, res) => {
       suppliers:       { count: parseInt(vend.rows[0].count) || 0 },
       purchase_orders: { count: parseInt(po.rows[0].count)   || 0 },
     }});
-  } catch (err) {
-    res.json({ tables: {}, error: err.message });
-  }
+  } catch (err) { res.json({ tables: {}, error: err.message }); }
 });
 
 router.delete('/disconnect/:provider', async (req, res) => {
@@ -160,9 +146,7 @@ router.delete('/disconnect/:provider', async (req, res) => {
   try {
     await query("UPDATE data_connections SET status='disconnected', updated_at=NOW() WHERE tenant_id=$1 AND provider=$2", [tenantId, req.params.provider]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;
