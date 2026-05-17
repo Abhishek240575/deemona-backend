@@ -1,4 +1,4 @@
-const express  = require('express');
+﻿const express  = require('express');
 const router   = express.Router();
 const { query } = require('../../services/database');
 const crypto   = require('crypto');
@@ -10,7 +10,7 @@ try { erpSync = require('../../jobs/erp-sync');                  } catch(e) { co
 
 const PKCE = new Map();
 function getTenantId(req) {
-  return req.user?.tenant_id || req.query.tenant_id || req.body?.tenant_id || 'default';
+  return req.user && req.user.tenant_id ? req.user.tenant_id : (req.query.tenant_id || (req.body && req.body.tenant_id) || 'default');
 }
 
 router.get('/status', async (req, res) => {
@@ -21,13 +21,7 @@ router.get('/status', async (req, res) => {
   ];
   try {
     const conns = await query(
-      `SELECT id, provider, status, last_sync_at, created_at,
-              COALESCE(error_message,'') as error_message,
-              COALESCE(external_id,'') as external_id,
-              COALESCE(metadata->>'company_name','') as company_name
-       FROM data_connections
-       WHERE tenant_id=$1 AND provider IN ('quickbooks','xero')
-       ORDER BY created_at DESC`,
+      "SELECT id, provider, status, last_sync_at, created_at, COALESCE(error_message,'') as error_message, COALESCE(external_id,'') as external_id, COALESCE(metadata->>'company_name','') as company_name FROM data_connections WHERE tenant_id=$1 AND provider IN ('quickbooks','xero') ORDER BY created_at DESC",
       [tenantId]
     );
     res.json({ connections: conns.rows, available_providers: providers });
@@ -39,7 +33,7 @@ router.get('/status', async (req, res) => {
 router.get('/quickbooks/connect', async (req, res) => {
   if (!QBO) return res.status(503).json({ error: 'QBO not configured. Add QBO_CLIENT_ID and QBO_CLIENT_SECRET to Render environment.' });
   const tenantId = getTenantId(req);
-  const state = `${tenantId}:${crypto.randomBytes(16).toString('hex')}`;
+  const state = tenantId + ':' + crypto.randomBytes(16).toString('hex');
   try {
     res.json({ auth_url: QBO.getAuthUrl(state), state });
   } catch (e) {
@@ -48,42 +42,38 @@ router.get('/quickbooks/connect', async (req, res) => {
 });
 
 router.get('/quickbooks/callback', async (req, res) => {
-  const { code, state, realmId } = req.query;
+  const code = req.query.code, state = req.query.state, realmId = req.query.realmId;
   if (!code || !state) return res.status(400).send('Missing code or state');
-  const [tenantId] = state.split(':');
+  const tenantId = state.split(':')[0];
   try {
     const tokens = await QBO.exchangeCodeForTokens(code);
     const expiry = new Date(Date.now() + tokens.expires_in * 1000);
-    await query(
-      `INSERT INTO data_connections (tenant_id,provider,status,external_id,access_token,refresh_token,token_expires_at,metadata,created_at,updated_at)
-       VALUES ($1,'quickbooks','active',$2,$3,$4,$5,$6,NOW(),NOW())
-       ON CONFLICT (tenant_id,provider) DO UPDATE SET status='active',external_id=$2,access_token=$3,refresh_token=$4,token_expires_at=$5,metadata=$6,updated_at=NOW()`,
-      [tenantId, realmId, tokens.access_token, tokens.refresh_token, expiry, JSON.stringify({ realm_id: realmId })]
-    );
+    await query("INSERT INTO data_connections (tenant_id,provider,status,external_id,access_token,refresh_token,token_expires_at,metadata,created_at,updated_at) VALUES ($1,'quickbooks','active',$2,$3,$4,$5,$6,NOW(),NOW()) ON CONFLICT (tenant_id,provider) DO UPDATE SET status='active',external_id=$2,access_token=$3,refresh_token=$4,token_expires_at=$5,metadata=$6,updated_at=NOW()",
+      [tenantId, realmId, tokens.access_token, tokens.refresh_token, expiry, JSON.stringify({ realm_id: realmId })]);
     if (erpSync) erpSync.syncTenant(tenantId, 'quickbooks', 'full').catch(console.error);
     res.redirect('/erp_integration.html?connected=quickbooks');
   } catch (err) {
-    res.redirect(`/erp_integration.html?error=${encodeURIComponent(err.message)}`);
+    res.redirect('/erp_integration.html?error=' + encodeURIComponent(err.message));
   }
 });
 
 router.get('/xero/connect', async (req, res) => {
   if (!Xero) return res.status(503).json({ error: 'Xero not configured. Add XERO_CLIENT_ID and XERO_CLIENT_SECRET to Render environment.' });
   const tenantId = getTenantId(req);
-  const state = `${tenantId}:${crypto.randomBytes(16).toString('hex')}`;
+  const state = tenantId + ':' + crypto.randomBytes(16).toString('hex');
   try {
-    const { url, verifier } = Xero.getAuthUrl(state);
-    PKCE.set(state, verifier);
-    res.json({ auth_url: url, state });
+    const result = Xero.getAuthUrl(state);
+    PKCE.set(state, result.verifier);
+    res.json({ auth_url: result.url, state });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
 router.get('/xero/callback', async (req, res) => {
-  const { code, state } = req.query;
+  const code = req.query.code, state = req.query.state;
   if (!code || !state) return res.status(400).send('Missing code or state');
-  const [tenantId] = state.split(':');
+  const tenantId = state.split(':')[0];
   const verifier = PKCE.get(state);
   if (!verifier) return res.status(400).send('Invalid state');
   PKCE.delete(state);
@@ -91,22 +81,19 @@ router.get('/xero/callback', async (req, res) => {
     const tokens = await Xero.exchangeCodeForTokens(code, verifier);
     const expiry = new Date(Date.now() + tokens.expires_in * 1000);
     const orgs = await Xero.getTenantConnections(tokens.access_token);
-    const org = orgs?.[0];
-    await query(
-      `INSERT INTO data_connections (tenant_id,provider,status,external_id,access_token,refresh_token,token_expires_at,metadata,created_at,updated_at)
-       VALUES ($1,'xero','active',$2,$3,$4,$5,$6,NOW(),NOW())
-       ON CONFLICT (tenant_id,provider) DO UPDATE SET status='active',external_id=$2,access_token=$3,refresh_token=$4,token_expires_at=$5,metadata=$6,updated_at=NOW()`,
-      [tenantId, org?.tenantId || '', tokens.access_token, tokens.refresh_token, expiry, JSON.stringify({ company_name: org?.tenantName || 'Xero' })]
-    );
+    const org = orgs && orgs[0] ? orgs[0] : {};
+    await query("INSERT INTO data_connections (tenant_id,provider,status,external_id,access_token,refresh_token,token_expires_at,metadata,created_at,updated_at) VALUES ($1,'xero','active',$2,$3,$4,$5,$6,NOW(),NOW()) ON CONFLICT (tenant_id,provider) DO UPDATE SET status='active',external_id=$2,access_token=$3,refresh_token=$4,token_expires_at=$5,metadata=$6,updated_at=NOW()",
+      [tenantId, org.tenantId || '', tokens.access_token, tokens.refresh_token, expiry, JSON.stringify({ company_name: org.tenantName || 'Xero' })]);
     if (erpSync) erpSync.syncTenant(tenantId, 'xero', 'full').catch(console.error);
-    res.redirect(`/erp_integration.html?connected=xero&company=${encodeURIComponent(org?.tenantName || 'Xero')}`);
+    res.redirect('/erp_integration.html?connected=xero&company=' + encodeURIComponent(org.tenantName || 'Xero'));
   } catch (err) {
-    res.redirect(`/erp_integration.html?error=${encodeURIComponent(err.message)}`);
+    res.redirect('/erp_integration.html?error=' + encodeURIComponent(err.message));
   }
 });
 
 router.post('/sync', async (req, res) => {
-  const { provider, mode = 'incremental' } = req.body;
+  const provider = req.body && req.body.provider;
+  const mode = (req.body && req.body.mode) || 'incremental';
   const tenantId = getTenantId(req);
   if (!provider) return res.status(400).json({ error: 'provider required' });
   if (!erpSync) return res.status(503).json({ error: 'Sync service not available' });
@@ -117,11 +104,7 @@ router.post('/sync', async (req, res) => {
 router.get('/sync-history', async (req, res) => {
   const tenantId = getTenantId(req);
   try {
-    const h = await query(
-      `SELECT source,status,row_count,error_log,created_at FROM data_imports
-       WHERE tenant_id=$1 AND source IN ('quickbooks','xero') ORDER BY created_at DESC LIMIT 50`,
-      [tenantId]
-    );
+    const h = await query("SELECT source,status,row_count,error_log,created_at FROM data_imports WHERE tenant_id=$1 AND source IN ('quickbooks','xero') ORDER BY created_at DESC LIMIT 50", [tenantId]);
     res.json(h.rows);
   } catch (err) {
     res.json([]);
@@ -132,10 +115,7 @@ router.get('/kpis/:dashboardId', async (req, res) => {
   const tenantId = getTenantId(req);
   const dashboardId = parseInt(req.params.dashboardId);
   try {
-    const snap = await query(
-      `SELECT snapshot_data,source,refreshed_at FROM kpi_snapshots WHERE tenant_id=$1 AND dashboard_id=$2`,
-      [tenantId, dashboardId]
-    );
+    const snap = await query("SELECT snapshot_data,source,refreshed_at FROM kpi_snapshots WHERE tenant_id=$1 AND dashboard_id=$2", [tenantId, dashboardId]);
     if (!snap.rows.length) return res.json({ kpis: {}, source: 'none' });
     res.json({ kpis: snap.rows[0].snapshot_data, source: snap.rows[0].source, refreshed_at: snap.rows[0].refreshed_at });
   } catch (err) {
@@ -146,17 +126,15 @@ router.get('/kpis/:dashboardId', async (req, res) => {
 router.get('/data-summary', async (req, res) => {
   const tenantId = getTenantId(req);
   try {
-    const [inv, accts, vendors, pos] = await Promise.all([
-      query(`SELECT COUNT(*) as count FROM invoices WHERE tenant_id=$1`, [tenantId]),
-      query(`SELECT COUNT(*) as count FROM gl_accounts WHERE tenant_id=$1`, [tenantId]),
-      query(`SELECT COUNT(*) as count FROM suppliers WHERE tenant_id=$1`, [tenantId]),
-      query(`SELECT COUNT(*) as count FROM purchase_orders WHERE tenant_id=$1`, [tenantId]),
-    ]);
+    const inv  = await query("SELECT COUNT(*) as count FROM invoices WHERE tenant_id=$1", [tenantId]);
+    const acct = await query("SELECT COUNT(*) as count FROM gl_accounts WHERE tenant_id=$1", [tenantId]);
+    const vend = await query("SELECT COUNT(*) as count FROM suppliers WHERE tenant_id=$1", [tenantId]);
+    const po   = await query("SELECT COUNT(*) as count FROM purchase_orders WHERE tenant_id=$1", [tenantId]);
     res.json({ tables: {
-      invoices:        { count: parseInt(inv.rows[0]?.count) || 0 },
-      gl_accounts:     { count: parseInt(accts.rows[0]?.count) || 0 },
-      suppliers:       { count: parseInt(vendors.rows[0]?.count) || 0 },
-      purchase_orders: { count: parseInt(pos.rows[0]?.count) || 0 },
+      invoices:        { count: parseInt(inv.rows[0].count)  || 0 },
+      gl_accounts:     { count: parseInt(acct.rows[0].count) || 0 },
+      suppliers:       { count: parseInt(vend.rows[0].count) || 0 },
+      purchase_orders: { count: parseInt(po.rows[0].count)   || 0 },
     }});
   } catch (err) {
     res.json({ tables: {}, error: err.message });
@@ -166,10 +144,7 @@ router.get('/data-summary', async (req, res) => {
 router.delete('/disconnect/:provider', async (req, res) => {
   const tenantId = getTenantId(req);
   try {
-    await query(
-      `UPDATE data_connections SET status='disconnected',updated_at=NOW() WHERE tenant_id=$1 AND provider=$2`,
-      [tenantId, req.params.provider]
-    );
+    await query("UPDATE data_connections SET status='disconnected',updated_at=NOW() WHERE tenant_id=$1 AND provider=$2", [tenantId, req.params.provider]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
