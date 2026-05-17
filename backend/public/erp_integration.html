@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deemona — Finance ERP Integration</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070b14;--bg2:#0d1526;--bg3:#111c35;
+  --surface:#0f1a2e;--surface2:#152038;--surface3:#1c2d4a;
+  --border:rgba(148,163,184,.1);--border2:rgba(148,163,184,.18);
+  --teal:#0d9488;--green:#10b981;--green2:#059669;
+  --blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --font:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+  --radius:10px;--radius-lg:14px
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+
+.header{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#0d9488,#0f766e);
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff}
+.logo-text{font-size:16px;font-weight:700;background:linear-gradient(135deg,#5eead4,#14b8a6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-tag{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.nav-link{padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border2);
+  background:transparent;color:var(--text2);font-size:12px;cursor:pointer;
+  text-decoration:none;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.nav-link:hover{background:var(--surface2);color:var(--text)}
+
+.container{max-width:1100px;margin:0 auto;padding:28px 24px 60px}
+.page-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+
+/* ── PROVIDER CARDS ── */
+.providers-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.provider-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .15s}
+.provider-card:hover{border-color:var(--border2)}
+.provider-card.connected{border-color:rgba(16,185,129,.35)}
+.prov-head{padding:20px 22px 16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+.prov-logo{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.prov-name{font-size:16px;font-weight:600}
+.prov-tagline{font-size:12px;color:var(--text2);margin-top:2px}
+.prov-status{margin-left:auto}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.badge-amber{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.badge-gray{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.3)}
+.prov-body{padding:16px 22px}
+.prov-features{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.feat-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.feat-icon{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.feat-ok{background:rgba(16,185,129,.15);color:#10b981}
+.prov-footer{padding:0 22px 20px;display:flex;gap:8px}
+
+/* ── SYNC SECTION ── */
+.section-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sync-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.sync-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.sync-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:6px}
+.sync-value{font-size:22px;font-weight:700;font-family:var(--mono);letter-spacing:-0.5px}
+.sync-meta{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* ── KPI PREVIEW ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 16px;border-top:2px solid var(--kc,var(--teal))}
+.kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:6px}
+.kpi-value{font-size:20px;font-weight:700;font-family:var(--mono);letter-spacing:-0.5px}
+.kpi-delta{font-size:11px;margin-top:4px}
+.kpi-source{font-size:9px;color:var(--text3);margin-top:3px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+
+/* ── DATA TABLES ── */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px}
+.table-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.table-title{font-size:13px;font-weight:600}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:var(--surface2)}
+th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+.td-mono{font-family:var(--mono);font-size:11px}
+.td-muted{color:var(--text2)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+  border-radius:var(--radius);border:1px solid var(--border2);
+  background:var(--surface2);color:var(--text2);font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--surface3);color:var(--text)}
+.btn-teal{background:linear-gradient(135deg,var(--teal),#0f766e);color:#fff;border-color:var(--teal)}
+.btn-teal:hover{box-shadow:0 4px 14px rgba(13,148,136,.4);transform:translateY(-1px)}
+.btn-green{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:var(--green)}
+.btn-green:hover{box-shadow:0 4px 14px rgba(16,185,129,.4);transform:translateY(-1px)}
+.btn-red{border-color:rgba(239,68,68,.3);color:var(--red)}
+.btn-red:hover{background:rgba(239,68,68,.1)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* ── SETUP GUIDE ── */
+.setup-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.step-row{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--surface3);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+  color:var(--text2);flex-shrink:0}
+.step-num.done{background:rgba(16,185,129,.2);color:var(--green)}
+.step-body{flex:1}
+.step-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.step-code{background:var(--bg3);border-radius:6px;padding:8px 12px;font-family:var(--mono);
+  font-size:11px;color:var(--text2);margin-top:8px;white-space:pre-wrap;word-break:break-all}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:2000;
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:12px 18px;display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;
+  transition:all .3s;max-width:380px;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── LOADING ── */
+.loading{display:flex;align-items:center;gap:8px;color:var(--text2);padding:32px;justify-content:center}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--teal);
+  border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo-mark">D</div>
+  <div class="logo-text">Deemona Finance</div>
+  <div style="width:1px;height:24px;background:var(--border2)"></div>
+  <span class="page-tag">Finance ERP Integration</span>
+  <div class="hdr-right">
+    <a href="index.html" class="nav-link">← Dashboard</a>
+    <a href="admin_panel.html" class="nav-link">⚙ Admin</a>
+    <a href="analytics.html" class="nav-link">📊 Analytics</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-title">Finance ERP Integration</div>
+  <div class="page-sub">Connect QuickBooks Online or Xero to automatically pull real financial data into all Finance dashboards — P&L, Balance Sheet, Cash Flow, A/R, A/P, and more.</div>
+
+  <!-- ── PROVIDER CARDS ── -->
+  <div class="section-title">🔌 Available Connectors</div>
+  <div class="providers-grid" id="providerGrid">
+    <div class="loading"><div class="spinner"></div> Loading connections…</div>
+  </div>
+
+  <!-- ── LIVE KPIs FROM ERP ── -->
+  <div class="section-title" id="kpiSectionTitle" style="display:none">📊 Live Financial KPIs <span id="kpiSource" style="font-size:11px;font-weight:400;color:var(--teal)"></span></div>
+  <div id="kpiSection" style="display:none">
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ── DATA SUMMARY ── -->
+  <div class="section-title" id="dataSectionTitle" style="display:none">📁 Synced Data</div>
+  <div id="dataSection" style="display:none">
+    <div class="sync-grid" id="syncGrid"></div>
+  </div>
+
+  <!-- ── SYNC HISTORY ── -->
+  <div class="section-title" id="historySectionTitle" style="display:none">🕒 Sync History</div>
+  <div id="historySection" style="display:none">
+    <div class="table-card">
+      <div class="table-head">
+        <span class="table-title">Last 20 sync runs</span>
+        <button class="btn btn-sm" onclick="loadHistory()" style="margin-left:auto">↻ Refresh</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Provider</th><th>Status</th><th>Records</th><th>Timestamp</th><th>Details</th></tr></thead>
+          <tbody id="historyTable"><tr><td colspan="5"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETUP GUIDE ── -->
+  <div class="section-title">📋 Setup Guide</div>
+  <div class="setup-steps">
+    <div class="step-row">
+      <div class="step-num done">1</div>
+      <div class="step-body">
+        <div class="step-title">Add environment variables to Render</div>
+        <div class="step-desc">Go to Render → deemona-backend → Environment and add these variables:</div>
+        <div class="step-code">QBO_CLIENT_ID=your_quickbooks_client_id
+QBO_CLIENT_SECRET=your_quickbooks_client_secret
+QBO_REDIRECT_URI=https://deemona-backend.onrender.com/v1/integrations/quickbooks/callback
+QBO_ENVIRONMENT=production
+QBO_WEBHOOK_VERIFIER_TOKEN=your_webhook_token
+
+XERO_CLIENT_ID=your_xero_client_id
+XERO_CLIENT_SECRET=your_xero_client_secret
+XERO_REDIRECT_URI=https://deemona-backend.onrender.com/v1/integrations/xero/callback
+XERO_WEBHOOK_KEY=your_xero_webhook_key</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Create QuickBooks app (takes 5 minutes)</div>
+        <div class="step-desc">Go to developer.intuit.com → Create an App → QuickBooks Online → Add redirect URI from above → Copy Client ID and Secret</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Add route to your backend index.js</div>
+        <div class="step-code">// src/routes/index.js — add these 3 lines:
+const erp     = require('./integrations/finance-erp');
+const erpSync = require('../jobs/erp-sync');
+router.use('/integrations', erp);
+erpSync.start();  // starts hourly + daily sync jobs</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Run schema patch to add external_id columns</div>
+        <div class="step-code">-- Run this SQL in psql against deemona_enterprise:
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS external_id VARCHAR(255);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS external_source VARCHAR(50);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_name VARCHAR(255);
+ALTER TABLE gl_accounts ADD COLUMN IF NOT EXISTS external_id VARCHAR(255);
+ALTER TABLE gl_accounts ADD COLUMN IF NOT EXISTS external_source VARCHAR(50);
+ALTER TABLE gl_accounts ADD COLUMN IF NOT EXISTS balance DECIMAL(18,2) DEFAULT 0;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS external_id VARCHAR(255);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS external_source VARCHAR(50);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_inv_ext ON invoices(tenant_id, external_id, external_source);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_acct_ext ON gl_accounts(tenant_id, external_id, external_source);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sup_ext ON suppliers(tenant_id, external_id, external_source);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_po_ext ON purchase_orders(tenant_id, external_id, external_source);
+ALTER TABLE kpi_values ADD CONSTRAINT kpiv_unique UNIQUE (tenant_id, kpi_definition_id, recorded_at);</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Install required npm package</div>
+        <div class="step-code">npm install node-cron axios</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Connect your ERP above and trigger first sync</div>
+        <div class="step-desc">Click "Connect QuickBooks" or "Connect Xero" above. After OAuth completes, the first full sync runs automatically. Live KPIs will appear in all Finance dashboards within 2–3 minutes.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DATA FLOW DIAGRAM ── -->
+  <div class="section-title">🔄 How Data Flows</div>
+  <div class="table-card" style="padding:20px 22px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;align-items:center;text-align:center">
+      <div style="padding:14px;background:rgba(59,130,246,.08);border-radius:8px;border:1px solid rgba(59,130,246,.2)">
+        <div style="font-size:20px;margin-bottom:6px">🏢</div>
+        <div style="font-size:12px;font-weight:600">QuickBooks<br>or Xero</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">Source ERP</div>
+      </div>
+      <div style="font-size:18px;color:var(--text3)">→</div>
+      <div style="padding:14px;background:rgba(13,148,136,.08);border-radius:8px;border:1px solid rgba(13,148,136,.2)">
+        <div style="font-size:20px;margin-bottom:6px">⚙️</div>
+        <div style="font-size:12px;font-weight:600">Data Mapper</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">Normalise + transform</div>
+      </div>
+      <div style="font-size:18px;color:var(--text3)">→</div>
+      <div style="padding:14px;background:rgba(139,92,246,.08);border-radius:8px;border:1px solid rgba(139,92,246,.2)">
+        <div style="font-size:20px;margin-bottom:6px">🗄️</div>
+        <div style="font-size:12px;font-weight:600">PostgreSQL</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">102 tables</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;align-items:center;text-align:center;margin-top:12px">
+      <div style="font-size:10px;color:var(--text3)">P&L, Balance Sheet<br>Cash Flow, A/R, A/P<br>Invoices, Vendors</div>
+      <div></div>
+      <div style="font-size:10px;color:var(--text3)">Format numbers<br>Map accounts<br>Calculate KPIs</div>
+      <div></div>
+      <div style="font-size:10px;color:var(--text3)">kpi_snapshots<br>kpi_values<br>gl_accounts<br>invoices</div>
+    </div>
+    <div style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--text2)">↓ Dashboard reads from kpi_snapshots</div>
+      <div style="margin-top:8px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <span class="badge badge-green">P&L Dashboard</span>
+        <span class="badge badge-green">Balance Sheet</span>
+        <span class="badge badge-green">Cash Flow</span>
+        <span class="badge badge-green">A/R Aging</span>
+        <span class="badge badge-green">A/P Aging</span>
+        <span class="badge badge-green">Invoice Register</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span id="toastIco">✅</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const API  = 'https://deemona-backend.onrender.com';
+const HDRS = { 'Content-Type':'application/json', 'X-API-Key':'02November@2012' };
+const TOKEN= sessionStorage.getItem('deemona_token') || '';
+if (TOKEN) HDRS['Authorization'] = 'Bearer ' + TOKEN;
+
+const USER = JSON.parse(sessionStorage.getItem('deemona_user') || '{}');
+const TENANT_ID = USER.tenant_id || '1';
+
+let connections = [];
+
+async function apiFetch(path, opts = {}) {
+  try {
+    const r = await fetch(API + path, { headers: HDRS, ...opts });
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e) { console.warn('[API]', path, e.message); return null; }
+}
+
+// ── Check URL params for post-OAuth redirect ─────────────────
+(function checkOAuthResult() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('connected')) {
+    const provider = params.get('connected');
+    const company  = params.get('company') || provider;
+    showToast('✅', `${company} connected successfully! Initial sync started.`);
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(loadAll, 2000);
+  }
+  if (params.get('error')) {
+    showToast('❌', 'Connection failed: ' + params.get('error'));
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+
+// ── Load everything ──────────────────────────────────────────
+async function loadAll() {
+  await loadProviders();
+  if (connections.some(c => c.status === 'active')) {
+    loadKPIs();
+    loadDataSummary();
+    loadHistory();
+    document.getElementById('kpiSectionTitle').style.display='flex';
+    document.getElementById('kpiSection').style.display='block';
+    document.getElementById('dataSectionTitle').style.display='flex';
+    document.getElementById('dataSection').style.display='block';
+    document.getElementById('historySectionTitle').style.display='flex';
+    document.getElementById('historySection').style.display='block';
+  }
+}
+
+// ── Provider grid ─────────────────────────────────────────────
+async function loadProviders() {
+  const data = await apiFetch(`/v1/integrations/status?tenant_id=${TENANT_ID}`);
+  connections = data?.connections || [];
+
+  const providers = [
+    {
+      id: 'quickbooks', name: 'QuickBooks Online', emoji: '📊',
+      bg: 'rgba(0,107,149,.12)', tagline: 'Intuit · Most popular accounting software',
+      features: ['Profit & Loss, Balance Sheet, Cash Flow', 'A/R & A/P Aging reports', 'Invoice Register, vendor & customer sync', 'Hourly incremental sync + webhooks'],
+    },
+    {
+      id: 'xero', name: 'Xero', emoji: '📗',
+      bg: 'rgba(19,167,119,.12)', tagline: 'Cloud accounting for small business',
+      features: ['Full P&L, Balance Sheet, Cash Summary', 'Aged Receivables & Payables', 'Invoices, contacts, purchase orders', 'Daily full sync + webhook support'],
+    },
+  ];
+
+  document.getElementById('providerGrid').innerHTML = providers.map(p => {
+    const conn = connections.find(c => c.provider === p.id);
+    const connected = conn?.status === 'active';
+    const lastSync  = conn?.last_sync_at ? new Date(conn.last_sync_at).toLocaleString() : 'Never';
+    const company   = conn?.company_name || '';
+    return `
+    <div class="provider-card ${connected ? 'connected' : ''}">
+      <div class="prov-head">
+        <div class="prov-logo" style="background:${p.bg}">${p.emoji}</div>
+        <div style="flex:1">
+          <div class="prov-name">${p.name}</div>
+          <div class="prov-tagline">${p.tagline}</div>
+        </div>
+        <div class="prov-status">
+          ${connected
+            ? `<span class="badge badge-green">● Connected</span>`
+            : `<span class="badge badge-gray">Not connected</span>`}
+        </div>
+      </div>
+      <div class="prov-body">
+        ${connected ? `<div style="font-size:12px;color:var(--teal);margin-bottom:10px;padding:6px 10px;background:rgba(16,185,129,.08);border-radius:6px;border:1px solid rgba(16,185,129,.2)">
+          ✅ ${company || p.name} · Last sync: ${lastSync}
+          ${conn?.sync_count ? ` · ${conn.sync_count} syncs` : ''}
+        </div>` : ''}
+        <div class="prov-features">
+          ${p.features.map(f => `<div class="feat-row"><div class="feat-icon feat-ok">✓</div>${f}</div>`).join('')}
+        </div>
+      </div>
+      <div class="prov-footer">
+        ${connected ? `
+          <button class="btn btn-teal btn-sm" onclick="triggerSync('${p.id}','full')">↻ Full Sync</button>
+          <button class="btn btn-sm" onclick="triggerSync('${p.id}','incremental')">⚡ Quick Sync</button>
+          <button class="btn btn-red btn-sm" onclick="disconnect('${p.id}')">Disconnect</button>
+        ` : `
+          <button class="btn btn-green" onclick="connectERP('${p.id}')">🔌 Connect ${p.name}</button>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Connect ERP ───────────────────────────────────────────────
+async function connectERP(provider) {
+  showToast('⏳', `Opening ${provider} authorization…`);
+  const data = await apiFetch(`/v1/integrations/${provider}/connect?tenant_id=${TENANT_ID}`);
+  if (data?.auth_url) {
+    window.location.href = data.auth_url;
+  } else {
+    showToast('❌', 'Could not get authorization URL. Check API keys in Render environment.');
+  }
+}
+
+// ── Sync ──────────────────────────────────────────────────────
+async function triggerSync(provider, mode) {
+  showToast('⏳', `${mode === 'full' ? 'Full' : 'Quick'} sync started for ${provider}…`);
+  await apiFetch('/v1/integrations/sync', {
+    method: 'POST',
+    body: JSON.stringify({ provider, mode, tenant_id: TENANT_ID })
+  });
+  showToast('✅', `Sync running in background. Refresh in 30–60 seconds.`);
+  setTimeout(loadAll, 45000);
+}
+
+// ── Disconnect ────────────────────────────────────────────────
+async function disconnect(provider) {
+  if (!confirm(`Disconnect ${provider}? Existing synced data will be kept.`)) return;
+  await apiFetch(`/v1/integrations/disconnect/${provider}?tenant_id=${TENANT_ID}`, { method: 'DELETE' });
+  showToast('✅', `${provider} disconnected`);
+  loadAll();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────
+async function loadKPIs() {
+  // Load P&L KPIs from snapshot (dashboard 1)
+  const data = await apiFetch(`/v1/integrations/kpis/1?tenant_id=${TENANT_ID}`);
+  if (!data || !data.kpis || !Object.keys(data.kpis).length) {
+    document.getElementById('kpiGrid').innerHTML = '<div style="padding:20px;color:var(--text3);font-size:13px;grid-column:1/-1">No KPI data yet — run a sync first.</div>';
+    return;
+  }
+  document.getElementById('kpiSource').textContent = `· from ${data.source} · updated ${new Date(data.refreshed_at).toLocaleString()}`;
+  const colors = ['#0d9488','#10b981','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#ec4899'];
+  document.getElementById('kpiGrid').innerHTML = Object.entries(data.kpis).map(([k, v], i) => `
+    <div class="kpi-card" style="--kc:${colors[i % colors.length]}">
+      <div class="kpi-label">${v.label}</div>
+      <div class="kpi-value">${v.value}</div>
+      <div class="kpi-source">${v.source || 'ERP'}</div>
+    </div>`).join('');
+}
+
+// ── Data summary ──────────────────────────────────────────────
+async function loadDataSummary() {
+  const data = await apiFetch(`/v1/integrations/data-summary?tenant_id=${TENANT_ID}`);
+  if (!data?.tables) return;
+  const items = [
+    { label:'Invoices synced',    val: data.tables.invoices?.count || 0,        icon:'🧾' },
+    { label:'GL Accounts',        val: data.tables.gl_accounts?.count || 0,     icon:'📒' },
+    { label:'Vendors/Suppliers',  val: data.tables.suppliers?.count || 0,       icon:'🏭' },
+    { label:'Purchase Orders',    val: data.tables.purchase_orders?.count || 0, icon:'📦' },
+  ];
+  document.getElementById('syncGrid').innerHTML = items.map(item => `
+    <div class="sync-card">
+      <div class="sync-label">${item.label}</div>
+      <div class="sync-value">${item.icon} ${item.val.toLocaleString()}</div>
+      <div class="sync-meta">records in DB</div>
+    </div>`).join('');
+}
+
+// ── Sync history ──────────────────────────────────────────────
+async function loadHistory() {
+  const rows = await apiFetch(`/v1/integrations/sync-history?tenant_id=${TENANT_ID}`);
+  if (!rows?.length) {
+    document.getElementById('historyTable').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No sync history yet</td></tr>';
+    return;
+  }
+  const statusBadge = s => s === 'success'
+    ? '<span class="badge badge-green">✅ Success</span>'
+    : '<span class="badge badge-red">❌ Failed</span>';
+  document.getElementById('historyTable').innerHTML = rows.map(r => `
+    <tr>
+      <td style="font-weight:500;text-transform:capitalize">${r.source}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td class="td-mono">${r.row_count ? r.row_count.toLocaleString() + ' records' : '—'}</td>
+      <td class="td-muted td-mono">${new Date(r.created_at).toLocaleString()}</td>
+      <td class="td-muted" style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.error_log || '—'}</td>
+    </tr>`).join('');
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+let toastT;
+function showToast(ico, msg) {
+  clearTimeout(toastT);
+  document.getElementById('toastIco').textContent = ico;
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  toastT = setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+// ── Boot ───────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
