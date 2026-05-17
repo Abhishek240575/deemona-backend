@@ -320,7 +320,7 @@ const TOKEN= sessionStorage.getItem('deemona_token') || '';
 if (TOKEN) HDRS['Authorization'] = 'Bearer ' + TOKEN;
 
 const USER = JSON.parse(sessionStorage.getItem('deemona_user') || '{}');
-const TENANT_ID = USER.tenant_id || '1';
+const TENANT_ID = USER.tenant_id || '2476e04f-06f2-425a-8bf4-b859a9df31a0';
 
 let connections = [];
 
