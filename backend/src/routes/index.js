@@ -110,6 +110,6 @@ router.use('/fiscal-periods', require('./admin/fiscalPeriods'));
 router.use('/currencies', require('./admin/currencies'));
 router.use('/data-imports', require('./admin/dataImports'));
 router.use('/data-connections', require('./admin/dataConnections'));
-router.use('/integrations', require('./integrations/finance-erp'));
+//router.use('/integrations', require('./integrations/finance-erp'));
 
 module.exports = router;

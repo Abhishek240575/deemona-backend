@@ -74,6 +74,9 @@ app.use('/v1/auth', require('./routes/auth'));
 const adminRoutes = require('./routes/admin');
 app.use('/v1/admin', adminRoutes);
 
+// 2b. Integration routes (PUBLIC - has API key check inside)
+app.use('/v1/integrations', require('./routes/integrations/finance-erp'));
+
 // 3. Apply authMiddleware to remaining /v1 routes
 app.use('/v1', authMiddleware);
 
