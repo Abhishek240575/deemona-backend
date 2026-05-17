@@ -29,17 +29,38 @@ function getTenantId(req) {
 // ================================================================
 
 router.get('/status', async (req, res) => {
-  const tenantId = getTenantId(req);
-  if (!tenantId) return res.status(400).json({ error: 'tenant_id required' });
+  const tenantId = getTenantId(req) || 'demo';
 
-  const conns = await query(
-    `SELECT id, provider, status, last_sync_at, sync_count, created_at, error_message,
-            external_id, COALESCE(metadata->>'company_name', '') as company_name
-     FROM data_connections
-     WHERE tenant_id=$1 AND provider IN ('quickbooks','xero')
-     ORDER BY created_at DESC`,
-    [tenantId]
-  );
+  try {
+    const conns = await query(
+      `SELECT id, provider, status, last_sync_at, created_at,
+              COALESCE(error_message, '') as error_message,
+              COALESCE(external_id, '') as external_id,
+              COALESCE(metadata->>'company_name', '') as company_name
+       FROM data_connections
+       WHERE tenant_id=$1 AND provider IN ('quickbooks','xero')
+       ORDER BY created_at DESC`,
+      [tenantId]
+    );
+
+    res.json({
+      connections: conns.rows,
+      available_providers: [
+        { id: 'quickbooks', name: 'QuickBooks Online', auth_url: '/v1/integrations/quickbooks/connect' },
+        { id: 'xero', name: 'Xero', auth_url: '/v1/integrations/xero/connect' },
+      ]
+    });
+  } catch (err) {
+    res.json({
+      connections: [],
+      available_providers: [
+        { id: 'quickbooks', name: 'QuickBooks Online', auth_url: '/v1/integrations/quickbooks/connect' },
+        { id: 'xero', name: 'Xero', auth_url: '/v1/integrations/xero/connect' },
+      ],
+      error: err.message
+    });
+  }
+});
 
   res.json({
     connections: conns.rows,
