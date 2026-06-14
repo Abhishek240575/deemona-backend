@@ -13,15 +13,12 @@ router.post('/login', async (req, res) => {
   }
   
   try {
-    const result = await db.query(
-      `SELECT u.id, u.email, u.password_hash, u.first_name, u.last_name, u.tenant_id,
-              u.is_admin, r.name AS role_name, r.domain AS role_domain,
-              t.name AS tenant_name, t.plan, t.status AS tenant_status
-       FROM users u
-       JOIN roles r ON u.role_id = r.id
-       JOIN tenants t ON u.tenant_id = t.id
-       WHERE u.email = $1 AND u.is_active = TRUE AND t.status = 'active'`,
-      [email]
+    SELECT u.id, u.email, u.password_hash, u.first_name, u.last_name, u.tenant_id,
+       u.is_admin, u.role_name, 'all' AS role_domain,
+       t.name AS tenant_name, t.plan, t.status AS tenant_status
+FROM users u
+JOIN tenants t ON u.tenant_id = t.id
+WHERE u.email = $1 AND u.is_active = TRUE AND t.status = 'active'
     );
     
     if (result.rows.length === 0) {
